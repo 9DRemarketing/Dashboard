@@ -1206,65 +1206,86 @@ async function loadOffers() {
 
     document.getElementById('badge-offers').textContent = totalOffers;
 
-    let html = `<div class="table-wrap"><table style="table-layout:fixed;width:100%">
-      <thead><tr>
-        <th style="width:65px">Stock</th>
-        <th style="width:160px">Véhicule</th>
-        <th style="width:140px">VIN</th>
-        <th style="width:42px">Année</th>
-        <th style="width:78px">KM</th>
-        <th style="width:65px">Date</th>
-        <th style="width:88px">Cost CAD</th>
-        <th style="width:88px">Cost USD</th>
-        <th style="width:88px">MMR</th>
-        <th style="width:72px">Diff</th>
-        <th style="width:110px">Client</th>
-        <th style="width:90px">Prix Demandé</th>
-        <th style="width:88px">Offre USD</th>
-        <th style="width:88px">Offre CAD</th>
-        <th style="width:60px">Frais</th>
-        <th style="width:55px">Comm</th>
-        <th style="width:88px">Profit</th>
-        <th>Notes</th>
-        <th style="width:65px">Statut</th>
-      </tr></thead><tbody>`;
-
+    // Grouper par stock
+    const grouped = {};
+    const stockOrder = [];
     for (const o of offers) {
-      const notesCls = o.notes && o.notes.trim() ? 'notes-highlight' : 'notes-empty';
-      const diffColor = o.diff > 0 ? 'var(--green)' : o.diff < 0 ? 'var(--red)' : 'var(--text3)';
-      const statutBadge = (()=>{
-        const s = o.statut.toUpperCase();
-        if(s.includes('ENCAN')) return `<span class="regs-averif">${o.statut}</span>`;
-        if(s.includes('STRETCHÉ') || s.includes('STRETCHED')) return `<span class="regs-fait">${o.statut}</span>`;
-        if(s.includes('AWAITING')) return `<span style="color:var(--text3);font-size:10px">${o.statut}</span>`;
-        if(s) return `<span style="color:var(--text2);font-size:10px">${o.statut}</span>`;
-        return '—';
-      })();
-      html += `<tr class="data-row">
-        <td><span class="stock-num copyable" onclick="copyText(event,'${o.stock}')" title="Copier">${o.stock}</span></td>
-        <td><span class="vehicle-name">${o.vehicule}</span></td>
-        <td><span class="vin-val copyable" onclick="copyText(event,'${o.vin||''}')" title="Copier VIN">${o.vin || '—'}</span></td>
-        <td class="cost-val">${o.annee || '—'}</td>
-        <td class="km-cell">${o.km ? o.km.toLocaleString('fr-CA') + ' km' : '—'}</td>
-        <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)">${o.date || '—'}</td>
-        <td class="cost-val">${o.costCad ? fmtCAD(o.costCad) : '—'}</td>
-        <td class="cost-val">${o.costUsd ? fmtUSD(o.costUsd) : '—'}</td>
-        <td class="cost-val">${o.mmr ? fmtCAD(o.mmr) : '—'}</td>
-        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:${diffColor};text-align:right;padding-right:10px">${o.diff ? (o.diff > 0 ? '+' : '') + fmtCAD(o.diff) : '—'}</td>
-        <td style="color:var(--accent2);font-weight:500;font-size:12px">${o.client || '—'}</td>
-        <td class="cost-val">${o.prixDemande ? fmtCAD(o.prixDemande) : '—'}</td>
-        <td class="cost-val">${o.offreUsd ? fmtUSD(o.offreUsd) : '—'}</td>
-        <td class="cost-val">${o.offreCad ? fmtCAD(o.offreCad) : '—'}</td>
-        <td class="cost-val">${o.frais ? fmtCAD(o.frais) : '—'}</td>
-        <td class="cost-val">${o.comm ? fmtCAD(o.comm) : '—'}</td>
-        <td>${profitCell(o.profit)}</td>
-        <td><span class="${notesCls}" title="${o.notes}">${o.notes || ''}</span></td>
-        <td style="text-align:center">${statutBadge}</td>
-      </tr>`;
+      if (!grouped[o.stock]) { grouped[o.stock] = []; stockOrder.push(o.stock); }
+      grouped[o.stock].push(o);
     }
 
-    html += `</tbody></table></div>`;
-    document.getElementById('offers-table').innerHTML = html;
+    let html = '';
+
+    for (const stock of stockOrder) {
+      const group = grouped[stock];
+      const first = group[0];
+      const bestProfit = Math.max(...group.map(o => o.profit));
+      const bestProfitColor = bestProfit > 0 ? 'var(--green)' : bestProfit < 0 ? 'var(--red)' : 'var(--text3)';
+
+      html += `
+        <div class="table-wrap" style="margin-bottom:16px">
+          <div class="table-section-label" style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span class="stock-num copyable" onclick="copyText(event,'${stock}')" style="font-size:13px">${stock}</span>
+              <span class="vehicle-name" style="color:var(--text)">${first.vehicule}</span>
+              <span class="cost-val" style="color:var(--text3)">${first.annee || ''}</span>
+              <span class="cost-val" style="color:var(--text3)">${first.km ? first.km.toLocaleString('fr-CA') + ' km' : ''}</span>
+              <span class="vin-val" style="font-size:10px">${first.vin || ''}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:16px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">Cost CAD <span style="color:var(--text2)">${fmtCAD(first.costCad)}</span></span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">MMR <span style="color:var(--text2)">${fmtCAD(first.mmr)}</span></span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">${group.length} offre${group.length > 1 ? 's' : ''}</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">Meilleur profit <span style="color:${bestProfitColor};font-weight:600">${bestProfit !== 0 ? (bestProfit > 0 ? '+' : '') + fmtCAD(bestProfit) : '—'}</span></span>
+            </div>
+          </div>
+          <table style="table-layout:fixed;width:100%">
+            <thead><tr>
+              <th style="width:110px">Client</th>
+              <th style="width:70px">Date</th>
+              <th style="width:90px">Prix Demandé</th>
+              <th style="width:88px">Offre USD</th>
+              <th style="width:88px">Offre CAD</th>
+              <th style="width:70px">Diff MMR</th>
+              <th style="width:60px">Frais</th>
+              <th style="width:55px">Comm</th>
+              <th style="width:95px">Profit</th>
+              <th>Notes</th>
+              <th style="width:75px">Statut</th>
+            </tr></thead>
+            <tbody>`;
+
+      for (const o of group) {
+        const notesCls = o.notes && o.notes.trim() ? 'notes-highlight' : 'notes-empty';
+        const diffColor = o.diff > 0 ? 'var(--green)' : o.diff < 0 ? 'var(--red)' : 'var(--text3)';
+        const isMax = o.profit === bestProfit && bestProfit !== 0;
+        const statutBadge = (()=>{
+          const s = o.statut.toUpperCase();
+          if(s.includes('ENCAN')) return `<span class="regs-averif">${o.statut}</span>`;
+          if(s.includes('STRETCHÉ')||s.includes('STRETCHED')) return `<span class="regs-fait">${o.statut}</span>`;
+          if(s.includes('AWAITING')) return `<span style="color:var(--text3);font-size:10px">${o.statut}</span>`;
+          if(s) return `<span style="color:var(--text2);font-size:10px">${o.statut}</span>`;
+          return '—';
+        })();
+        html += `<tr class="data-row" style="${isMax ? 'background:rgba(52,211,153,0.05);' : ''}">
+          <td style="color:var(--accent2);font-weight:500;font-size:12px">${o.client || '—'}</td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)">${o.date || '—'}</td>
+          <td class="cost-val">${o.prixDemande ? fmtCAD(o.prixDemande) : '—'}</td>
+          <td class="cost-val">${o.offreUsd ? fmtUSD(o.offreUsd) : '—'}</td>
+          <td class="cost-val">${o.offreCad ? fmtCAD(o.offreCad) : '—'}</td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:${diffColor};text-align:right;padding-right:10px">${o.diff ? (o.diff > 0 ? '+' : '') + fmtCAD(o.diff) : '—'}</td>
+          <td class="cost-val">${o.frais ? fmtCAD(o.frais) : '—'}</td>
+          <td class="cost-val">${o.comm ? fmtCAD(o.comm) : '—'}</td>
+          <td>${profitCell(o.profit)}${isMax ? ' <span style="font-size:9px;color:var(--green);font-family:JetBrains Mono,monospace">★ best</span>' : ''}</td>
+          <td><span class="${notesCls}" title="${o.notes}">${o.notes || ''}</span></td>
+          <td style="text-align:center">${statutBadge}</td>
+        </tr>`;
+      }
+
+      html += `</tbody></table></div>`;
+    }
+
+    document.getElementById('offers-table').innerHTML = html || '<div class="empty">Aucune offre active</div>';
   } catch(e) {
     document.getElementById('offers-table').innerHTML = `<div class="error">Erreur de chargement.<br><small>${e.message}</small></div>`;
   }
