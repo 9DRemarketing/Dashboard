@@ -505,7 +505,6 @@
 <div class="tabs">
   <div class="tab active" onclick="switchTab('cdn')">🇨🇦 Inventaire CDN <span class="tab-badge" id="badge-cdn">—</span></div>
   <div class="tab" onclick="switchTab('us')">🇺🇸 Inventaire US <span class="tab-badge" id="badge-us">—</span></div>
-  <div class="tab" onclick="switchTab('offers')">💼 Buyers Offers <span class="tab-badge" id="badge-offers">—</span></div>
 </div>
 
 <div class="content">
@@ -522,13 +521,6 @@
     <div class="kpi-block" id="kpi-us" style="grid-template-columns:repeat(3,1fr)"></div>
     <input class="search-bar" type="text" placeholder="Rechercher stock, véhicule, client..." oninput="filterTable('us-table', this.value)">
     <div id="us-table"><div class="loading"><div class="loading-spinner"></div>Chargement...</div></div>
-  </div>
-
-  <!-- OFFERS TAB -->
-  <div class="tab-panel" id="panel-offers">
-    <div class="kpi-row" id="kpi-offers"></div>
-    <input class="search-bar" type="text" placeholder="Rechercher stock, véhicule, client..." oninput="filterTable('offers-table', this.value)">
-    <div id="offers-table"><div class="loading"><div class="loading-spinner"></div>Chargement...</div></div>
   </div>
 
 </div>
@@ -592,7 +584,7 @@ function profitCell(n) {
 
 function switchTab(tab) {
   document.querySelectorAll('.tab').forEach((t,i) => {
-    const tabs = ['cdn','us','offers'];
+    const tabs = ['cdn','us'];
     t.classList.toggle('active', tabs[i] === tab);
   });
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -1288,7 +1280,7 @@ async function loadOffers() {
 
 async function loadAll() {
   document.getElementById('last-update').textContent = 'Chargement...';
-  await Promise.all([loadCDN(), loadUS(), loadOffers()]);
+  await Promise.all([loadCDN(), loadUS()]);
   const now = new Date();
   document.getElementById('last-update').textContent = now.toLocaleTimeString('fr-CA', {hour:'2-digit', minute:'2-digit'});
 }
