@@ -463,37 +463,66 @@ async function loadCDN() {
     const text = await fetchCSV(GIDS.cdn);
     const rows = parseCSV(text);
 
-    // Parse portfolio summary from first rows
+    // Parse portfolio summary — positions fixes dans le Google Sheet
+    // Row 1 (index 0) = ligne 1 du CSV = ligne 1 du sheet
+    // C2 = col index 2, row index 1
     let portefeuilleAlloue = 0, portefeuilleReel = 0, portefeuilleProj = 0, disponible = 0, disponibleProj = 0;
-    let tommyReel = 0, tommyProj = 0, tommyAlloc = 0;
-    let normandReel = 0, normandProj = 0, normandAlloc = 0;
+    let tommyReel = 0, tommyProj = 0;
+    let normandReel = 0, normandProj = 0;
     let advanceSignal = 0;
-    let tommyCount = 0, tommyMax = 0, normandCount = 0, normandMax = 0;
-    let detailCount = 0, detailMax = 0, ontarioCount = 0, ontarioMax = 0;
+    let tommyCount = 0, normandCount = 0, detailCount = 0, ontarioCount = 0;
+    let inventaireTotal = 0;
 
+    // Lire toutes les 10 premières lignes pour trouver les valeurs
     for (let i = 0; i < 10; i++) {
       const r = rows[i] || [];
       const joined = r.join('|').toLowerCase();
 
+      // Portefeuille alloué — C2
       if (joined.includes('portfeuille alloué') || joined.includes('portefeuille alloué')) portefeuilleAlloue = parseNum(r[2]);
+      // Portefeuille réel — C2 de sa ligne
       if (joined.includes('portefeuille réel') && !joined.includes('tommy') && !joined.includes('normand')) portefeuilleReel = parseNum(r[2]);
-      if (joined.includes('portefeuille projeté') || joined.includes('projetté')) portefeuilleProj = parseNum(r[6]);
-      if (joined.includes('disponible réel') || (joined.includes('disponible') && !joined.includes('projeté'))) disponible = parseNum(r[2]);
-      if (joined.includes('disponible projeté')) disponibleProj = parseNum(r[6]);
-      if (joined.includes('tommy réel') || joined.includes('tommy reel')) { tommyReel = parseNum(r[2]); tommyAlloc = parseNum(r[1].replace(/[^0-9,]/g,'')); }
-      if (joined.includes('tommy projetté') || joined.includes('tommy projeté')) tommyProj = parseNum(r[6]);
-      if (joined.includes('normand réel') || joined.includes('normand reel')) { normandReel = parseNum(r[2]); normandAlloc = parseNum(r[1].replace(/[^0-9,]/g,'')); }
-      if (joined.includes('normand projetté') || joined.includes('normand projeté')) normandProj = parseNum(r[6]);
+      // Portefeuille projeté — G2 (index 6)
+      if (joined.includes('portefeuille projeté') || joined.includes('portefeuille projett')) portefeuilleProj = parseNum(r[6]);
+      // Disponible réel
+      if (joined.includes('disponible réel') && !joined.includes('projeté')) disponible = parseNum(r[2]);
+      // Disponible projeté
+      if (joined.includes('disponible projeté') || joined.includes('disponible projett')) disponibleProj = parseNum(r[6]);
+      // Tommy réel
+      if (joined.includes('tommy réel') || joined.includes('tommy reel')) tommyReel = parseNum(r[2]);
+      // Tommy projeté
+      if ((joined.includes('tommy projetté') || joined.includes('tommy projeté') || joined.includes('tommy projett')) && !joined.includes('réel')) tommyProj = parseNum(r[6]);
+      // Normand réel
+      if (joined.includes('normand réel') || joined.includes('normand reel')) normandReel = parseNum(r[2]);
+      // Normand projeté
+      if ((joined.includes('normand projetté') || joined.includes('normand projeté') || joined.includes('normand projett')) && !joined.includes('réel')) normandProj = parseNum(r[6]);
+      // Advance Signal
       if (joined.includes('advance signal')) advanceSignal = parseNum(r[2]);
 
-      // Counters: TOMMY / NORMAND / DÉTAIL / ONTARIO in columns further right
+      // Compteurs J2:J5 (col index 9) et total L2:L5 (col index 11)
       for (let c = 0; c < r.length; c++) {
         const cell = (r[c] || '').toUpperCase().trim();
-        if (cell === 'TOMMY') { tommyCount = parseNum(r[c+1]); tommyMax = parseNum(r[c+2]); }
-        if (cell === 'NORMAND') { normandCount = parseNum(r[c+1]); normandMax = parseNum(r[c+2]); }
-        if (cell === 'DÉTAIL' || cell === 'DETAIL') { detailCount = parseNum(r[c+1]); detailMax = parseNum(r[c+2]); }
-        if (cell === 'ONTARIO') { ontarioCount = parseNum(r[c+1]); ontarioMax = parseNum(r[c+2]); }
+        if (cell === 'TOMMY') {
+          tommyCount = parseNum(r[c+1]) || tommyCount;
+        }
+        if (cell === 'NORMAND') {
+          normandCount = parseNum(r[c+1]) || normandCount;
+        }
+        if (cell === 'DÉTAIL' || cell === 'DETAIL') {
+          detailCount = parseNum(r[c+1]);
+        }
+        if (cell === 'ONTARIO') {
+          ontarioCount = parseNum(r[c+1]) || ontarioCount;
+        }
       }
+      // Total inventaire L2:L5 — cherche dans col 11 ou 12
+      if (r[11] && parseNum(r[11]) > 50) inventaireTotal = parseNum(r[11]);
+      if (r[12] && parseNum(r[12]) > 50) inventaireTotal = parseNum(r[12]);
+    }
+
+    // Si portefeuilleReel pas trouvé par texte, lire directement row[1] col[2] (C2)
+    if (portefeuilleReel === 0 && rows[1] && rows[1][2]) {
+      portefeuilleReel = parseNum(rows[1][2]);
     }
 
     // Find all data rows (stock numbers starting with B)
@@ -563,14 +592,14 @@ async function loadCDN() {
           <div class="kpi-value ${disponibleProj >= 0 ? 'green' : 'red'}">${fmtCAD(disponibleProj)}</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-label">Véhicules CDN</div>
-          <div class="kpi-value">${vehicles.length}</div>
-          <div class="kpi-sub">en inventaire</div>
+          <div class="kpi-label">Inventaire Total</div>
+          <div class="kpi-value">${inventaireTotal || (tommyCount + normandCount + detailCount + ontarioCount) || vehicles.length}</div>
+          <div class="kpi-sub">tous secteurs</div>
         </div>
       </div>
     `;
 
-    // Rangée 2 : Tommy / Normand / Advance / Compteurs (4 cartes)
+    // Rangée 2 : Tommy / Normand / Advance / Répartition (4 cartes)
     const row2 = `
       <div class="kpi-row kpi-row-2">
         <div class="kpi-card tommy">
@@ -585,27 +614,27 @@ async function loadCDN() {
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Advance Signal</div>
-          <div class="kpi-value yellow" style="color:var(--yellow)">${fmtCAD(advanceSignal)}</div>
+          <div class="kpi-value" style="color:var(--yellow)">${fmtCAD(advanceSignal)}</div>
           <div class="kpi-sub">avance en cours</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-label">Compteurs</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px">
+          <div class="kpi-label">Répartition de l'Inventaire</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
             <div>
-              <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace">TOMMY</div>
-              <div style="font-family:'Syne',sans-serif;font-size:16px;color:var(--accent2)">${tommyCount || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace"> /${tommyMax || '—'}</span></div>
+              <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:2px">TOMMY</div>
+              <div style="font-family:'Syne',sans-serif;font-size:20px;color:var(--accent2)">${tommyCount}<span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace"> unités</span></div>
             </div>
             <div>
-              <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace">NORMAND</div>
-              <div style="font-family:'Syne',sans-serif;font-size:16px;color:#c847ff">${normandCount || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace"> /${normandMax || '—'}</span></div>
+              <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:2px">NORMAND</div>
+              <div style="font-family:'Syne',sans-serif;font-size:20px;color:#c847ff">${normandCount}<span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace"> unités</span></div>
             </div>
             <div>
-              <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace">DÉTAIL</div>
-              <div style="font-family:'Syne',sans-serif;font-size:16px;color:var(--green)">${detailCount || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace"> /${detailMax || '—'}</span></div>
+              <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:2px">DÉTAIL</div>
+              <div style="font-family:'Syne',sans-serif;font-size:20px;color:var(--green)">${detailCount}<span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace"> unités</span></div>
             </div>
             <div>
-              <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace">ONTARIO</div>
-              <div style="font-family:'Syne',sans-serif;font-size:16px;color:var(--yellow)">${ontarioCount || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace"> /${ontarioMax || '—'}</span></div>
+              <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:2px">ONTARIO</div>
+              <div style="font-family:'Syne',sans-serif;font-size:20px;color:var(--yellow)">${ontarioCount}<span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace"> unités</span></div>
             </div>
           </div>
         </div>
