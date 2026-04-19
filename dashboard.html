@@ -519,7 +519,7 @@
 
   <!-- US TAB -->
   <div class="tab-panel" id="panel-us">
-    <div class="kpi-row" id="kpi-us"></div>
+    <div class="kpi-block" id="kpi-us" style="grid-template-columns:repeat(3,1fr)"></div>
     <input class="search-bar" type="text" placeholder="Rechercher stock, véhicule, client..." oninput="filterTable('us-table', this.value)">
     <div id="us-table"><div class="loading"><div class="loading-spinner"></div>Chargement...</div></div>
   </div>
@@ -956,18 +956,54 @@ async function loadUS() {
       }
     }
 
-    // KPIs
-    const totalCostUsd = vehicles.reduce((s, v) => s + v.costUsd, 0);
-    const totalCostCad = vehicles.reduce((s, v) => s + v.costCad, 0);
-    const totalProfitCad = vehicles.filter(v => v.profitCad !== 0).reduce((s, v) => s + v.profitCad, 0);
-    const soldCount = vehicles.filter(v => v.sold && v.sold.trim()).length;
+    // KPIs — exclure STRATTON
+    const nonStratton = vehicles.filter(v => v.section !== 'STRATTON');
+    const totalCostCad = nonStratton.reduce((s, v) => s + v.costCad, 0);
+    const speedo = vehicles.filter(v => v.section === 'AT SPEEDO');
+    const signal = vehicles.filter(v => v.section === 'AT SIGNAL');
+    const div = vehicles.filter(v => v.section === 'AT DIV');
+    const totalInv = speedo.length + signal.length + div.length;
+    const vendus = nonStratton.filter(v => v.client && v.client.trim()).length;
+    const nonVendus = nonStratton.filter(v => !v.client || !v.client.trim()).length;
 
     document.getElementById('kpi-us').innerHTML = `
-      <div class="kpi-card"><div class="kpi-label">Total Véhicules US</div><div class="kpi-value">${vehicles.length}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Coût Total USD</div><div class="kpi-value" style="color:var(--accent-light)">${fmtUSD(totalCostUsd)}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Coût Total CAD</div><div class="kpi-value" style="color:var(--accent2)">${fmtCAD(totalCostCad)}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Profit Total CAD</div><div class="kpi-value ${totalProfitCad >= 0 ? 'green' : 'red'}">${fmtCAD(totalProfitCad)}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Vendus</div><div class="kpi-value" style="color:var(--green)">${soldCount}</div></div>
+      <div class="kpi-tableau highlight" style="flex:1">
+        <div class="kpi-tableau-header">Portefeuille</div>
+        <div class="kpi-ligne">
+          <span class="kpi-ligne-label">Coût Total CAD</span>
+          <span class="kpi-ligne-val accent" style="color:var(--accent-light)">${fmtCAD(totalCostCad)}</span>
+        </div>
+      </div>
+      <div class="kpi-tableau tommy" style="flex:1">
+        <div class="kpi-tableau-header">Inventaire</div>
+        <div class="kpi-ligne total-row">
+          <span class="kpi-ligne-label">Total (SPD+SIG+DIV)</span>
+          <span class="kpi-ligne-val big" style="color:var(--accent2)">${totalInv}</span>
+        </div>
+        <div class="kpi-ligne">
+          <span class="kpi-ligne-label">AT Speedo</span>
+          <span class="kpi-ligne-val" style="color:var(--yellow)">${speedo.length}</span>
+        </div>
+        <div class="kpi-ligne">
+          <span class="kpi-ligne-label">AT Signal</span>
+          <span class="kpi-ligne-val" style="color:var(--accent2)">${signal.length}</span>
+        </div>
+        <div class="kpi-ligne">
+          <span class="kpi-ligne-label">AT DIV</span>
+          <span class="kpi-ligne-val" style="color:var(--accent3)">${div.length}</span>
+        </div>
+      </div>
+      <div class="kpi-tableau inventaire" style="flex:1">
+        <div class="kpi-tableau-header">Répartition</div>
+        <div class="kpi-ligne">
+          <span class="kpi-ligne-label">Vendus</span>
+          <span class="kpi-ligne-val green big">${vendus}</span>
+        </div>
+        <div class="kpi-ligne">
+          <span class="kpi-ligne-label">Non vendus</span>
+          <span class="kpi-ligne-val red big">${nonVendus}</span>
+        </div>
+      </div>
     `;
 
     document.getElementById('badge-us').textContent = vehicles.length;
