@@ -942,27 +942,32 @@ async function loadUS() {
       }
       if (row[0] && row[0].startsWith('B') && row[1] && !row[1].startsWith('#')) {
         vehicles.push({
-          stock: row[0], vehicule: row[1], vin: row[2], annee: row[3],
+          stock: row[0], vehicule: row[1], vin: row[2],
+          annee: (row[3] && row[3].match(/^\d{4}$/)) ? row[3] : (row[3] && row[3].match(/^\d{2}$/)) ? '20'+row[3] : row[3],
           couleur: row[4], km: row[5], notes: row[6],
-          arrival: row[7], submit: row[8], release: row[9], sold: row[10],
+          arrival: row[7] || '', submit: row[8] || '', release: row[9] || '',
+          sold: row[10] || '', payment: row[11] || '', counter: row[12] || '',
           client: row[13] || '', acheteur: row[14] || '',
           costUsd: parseNum(row[15]), costCad: parseNum(row[16]),
           sellCad: parseNum(row[17]), profitCad: parseNum(row[18]),
-          statut: row[21] || '', section: currentSection
+          regs: row[19] || '', cfLien: row[20] || '',
+          section: currentSection
         });
       }
     }
 
     // KPIs
+    const totalCostUsd = vehicles.reduce((s, v) => s + v.costUsd, 0);
     const totalCostCad = vehicles.reduce((s, v) => s + v.costCad, 0);
     const totalProfitCad = vehicles.filter(v => v.profitCad !== 0).reduce((s, v) => s + v.profitCad, 0);
-    const sold = vehicles.filter(v => v.sold && v.sold.trim()).length;
+    const soldCount = vehicles.filter(v => v.sold && v.sold.trim()).length;
 
     document.getElementById('kpi-us').innerHTML = `
       <div class="kpi-card"><div class="kpi-label">Total Véhicules US</div><div class="kpi-value">${vehicles.length}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Coût Total CAD</div><div class="kpi-value accent">${fmtCAD(totalCostCad)}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Coût Total USD</div><div class="kpi-value" style="color:var(--accent-light)">${fmtUSD(totalCostUsd)}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Coût Total CAD</div><div class="kpi-value" style="color:var(--accent2)">${fmtCAD(totalCostCad)}</div></div>
       <div class="kpi-card"><div class="kpi-label">Profit Total CAD</div><div class="kpi-value ${totalProfitCad >= 0 ? 'green' : 'red'}">${fmtCAD(totalProfitCad)}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Vendus</div><div class="kpi-value blue">${sold}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Vendus</div><div class="kpi-value" style="color:var(--green)">${soldCount}</div></div>
     `;
 
     document.getElementById('badge-us').textContent = vehicles.length;
@@ -974,38 +979,100 @@ async function loadUS() {
       sections[sec].push(v);
     }
 
-    const sectionColors = { 'AT SPEEDO': '#e8ff47', 'AT SIGNAL': '#47c8ff', 'AT DIV': '#ff6b47', 'STRATTON': '#47ff9a' };
+    const sectionColors = { 'AT SPEEDO': '#fbbf24', 'AT SIGNAL': '#38bdf8', 'AT DIV': '#f472b6', 'STRATTON': '#34d399' };
     let html = '';
 
     for (const sec of ['AT SPEEDO','AT SIGNAL','AT DIV','STRATTON','AUTRE']) {
       if (!sections[sec] || sections[sec].length === 0) continue;
-      const dotColor = sectionColors[sec] || '#8888aa';
+      const dotColor = sectionColors[sec] || '#475569';
       html += `
         <div class="table-wrap">
           <div class="table-section-label">
             <span class="dot" style="background:${dotColor}"></span>
             ${sec} <span style="color:var(--text3);margin-left:8px">${sections[sec].length} unité${sections[sec].length > 1 ? 's' : ''}</span>
           </div>
-          <table>
+          <table style="table-layout:fixed;width:100%">
             <thead><tr>
-              <th>Stock</th><th>Véhicule</th><th>Année</th><th>KM</th>
-              <th>Client</th><th>Cost USD</th><th>Cost CAD</th><th>Sell CAD</th><th>Profit</th><th>Statut</th><th>Notes</th>
+              <th style="width:65px">Stock</th>
+              <th style="width:160px">Véhicule</th>
+              <th style="width:140px">VIN</th>
+              <th style="width:42px">Année</th>
+              <th style="width:55px">Couleur</th>
+              <th style="width:78px">KM</th>
+              <th style="width:160px">Notes</th>
+              <th style="width:68px">Arrival</th>
+              <th style="width:65px">Submit</th>
+              <th style="width:65px">Release</th>
+              <th style="width:65px">Sold</th>
+              <th style="width:65px">Payment</th>
+              <th style="width:48px">Counter</th>
+              <th style="width:115px">Client</th>
+              <th style="width:100px">Acheteur</th>
+              <th style="width:18px"></th>
             </tr></thead>
             <tbody>
       `;
       for (const v of sections[sec]) {
-        html += `<tr class="data-row">
-          <td><span class="stock-num">${v.stock}</span></td>
+        const rowId = 'row-us-' + v.stock.replace(/\W/g,'');
+        const profitColor = v.profitCad > 0 ? 'var(--green)' : v.profitCad < 0 ? 'var(--red)' : 'var(--text3)';
+        const profitFmt = v.profitCad !== 0 ? (v.profitCad > 0 ? '+' : '') + fmtCAD(v.profitCad) : '—';
+        const notesCls = v.notes && v.notes.trim() ? 'notes-highlight' : 'notes-empty';
+        const dateCell = (d) => d ? `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)">${d}</span>` : '<span style="color:var(--text3)">—</span>';
+        const regsUs = (()=>{
+          const r = (v.regs||'').trim().toUpperCase();
+          if(!r||r==='—') return '<span class="regs-afaire">—</span>';
+          if(r==='FAIT') return '<span class="regs-fait">FAIT</span>';
+          if(r.includes('À FAIRE')) return '<span class="regs-afaire">À FAIRE</span>';
+          if(r.includes('À VÉRIF')||r.includes('A VERIF')||r==='X'||r.includes('SCAN')) return `<span class="regs-averif">${v.regs}</span>`;
+          if(r==='N/A') return '<span class="regs-na">N/A</span>';
+          return `<span class="regs-na">${v.regs}</span>`;
+        })();
+        const cfUs = (()=>{
+          const cf = (v.cfLien||'').trim().toUpperCase();
+          if(!cf||cf==='—') return '<span class="regs-afaire">—</span>';
+          if(cf==='FAIT') return '<span class="regs-fait">FAIT</span>';
+          if(cf.includes('À FAIRE')) return '<span class="regs-afaire">À FAIRE</span>';
+          if(cf.includes('À VÉRIF')||cf.includes('A VERIF')) return '<span class="regs-averif">À VÉRIF</span>';
+          if(cf==='N/A') return '<span class="regs-na">N/A</span>';
+          if(cf.startsWith('HTTP')) return `<a href="${v.cfLien}" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:10px;text-decoration:none">↗ Lien</a>`;
+          return `<span class="regs-na">${v.cfLien}</span>`;
+        })();
+        html += `
+        <tr class="data-row expandable-row" onclick="toggleExpand('${rowId}')">
+          <td><span class="stock-num copyable" onclick="copyText(event,'${v.stock}')" title="Copier">${v.stock}</span></td>
           <td><span class="vehicle-name">${v.vehicule}</span></td>
-          <td class="cost-val">${v.annee}</td>
+          <td><span class="vin-val copyable" onclick="copyText(event,'${v.vin||''}')" title="Copier VIN">${v.vin || '—'}</span></td>
+          <td class="cost-val">${v.annee || '—'}</td>
+          <td class="cost-val">${v.couleur || '—'}</td>
           <td class="km-cell">${v.km ? Number(v.km).toLocaleString('fr-CA') + ' km' : '—'}</td>
-          <td><span class="offer-client">${v.client || '—'}</span></td>
-          <td class="cost-val">${v.costUsd ? fmtUSD(v.costUsd) : '—'}</td>
-          <td class="cost-val">${v.costCad ? fmtCAD(v.costCad) : '—'}</td>
-          <td class="cost-val">${v.sellCad ? fmtCAD(v.sellCad) : '—'}</td>
-          <td>${profitCell(v.profitCad)}</td>
-          <td>${statusBadge(v.statut)}</td>
-          <td><span class="notes-cell" title="${v.notes}">${v.notes || '—'}</span></td>
+          <td><span class="${notesCls}" title="${v.notes}">${v.notes || ''}</span></td>
+          <td>${dateCell(v.arrival)}</td>
+          <td>${dateCell(v.submit)}</td>
+          <td>${dateCell(v.release)}</td>
+          <td>${dateCell(v.sold)}</td>
+          <td>${dateCell(v.payment)}</td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);text-align:center">${v.counter || '—'}</td>
+          <td class="cost-val" title="${v.client}">${v.client || '—'}</td>
+          <td class="cost-val" title="${v.acheteur}">${v.acheteur || '—'}</td>
+          <td style="color:var(--text3);font-size:10px;text-align:center">▾</td>
+        </tr>
+        <tr class="expand-panel" id="${rowId}" style="display:none">
+          <td colspan="16">
+            <div class="expand-grid" style="grid-template-columns:auto auto;justify-content:start;gap:0">
+              <div class="expand-section" style="min-width:280px;max-width:360px">
+                <div class="expand-section-title">💰 TRANSACTION</div>
+                <div class="expand-row"><span>Cost USD</span><span style="color:var(--accent-light)">${v.costUsd ? fmtUSD(v.costUsd) : '—'}</span></div>
+                <div class="expand-row"><span>Cost CAD</span><span style="color:var(--accent2)">${v.costCad ? fmtCAD(v.costCad) : '—'}</span></div>
+                <div class="expand-row"><span>Sell Price CAD</span><span style="color:var(--text2)">${v.sellCad ? fmtCAD(v.sellCad) : '—'}</span></div>
+                <div class="expand-row"><span>Profit CAD</span><span style="color:${profitColor};font-weight:600">${profitFmt}</span></div>
+              </div>
+              <div class="expand-section" style="min-width:200px;max-width:260px">
+                <div class="expand-section-title">📋 ADMIN</div>
+                <div class="expand-row"><span>REGS</span><span>${regsUs}</span></div>
+                <div class="expand-row"><span>CF + Lien</span><span>${cfUs}</span></div>
+              </div>
+            </div>
+          </td>
         </tr>`;
       }
       html += `</tbody></table></div>`;
