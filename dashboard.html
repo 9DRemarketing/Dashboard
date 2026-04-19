@@ -683,7 +683,8 @@ async function loadCDN() {
       }
       if (row[0] && row[0].startsWith('B') && row[1] && !row[1].startsWith('#')) {
         vehicles.push({
-          stock: row[0], vehicule: row[1], vin: row[2], annee: row[3],
+          stock: row[0], vehicule: row[1], vin: row[2], 
+          annee: (row[3] && row[3].match(/^\d{4}$/)) ? row[3] : (row[3] && row[3].match(/^\d{2}$/)) ? '20' + row[3] : row[3],
           couleur: row[4], km: row[5], location: row[6], notes: row[7],
           rappel: row[8] || '', mec: row[9] || '', body: row[10] || '',
           esthet: row[11] || '', cfLien: row[12] || '', regs: row[13] || '',
@@ -811,17 +812,17 @@ async function loadCDN() {
           </div>
           <table style="table-layout:fixed;width:100%">
             <thead><tr>
-              <th style="width:70px">Stock</th>
-              <th style="width:180px">Véhicule</th>
-              <th style="width:145px">VIN</th>
-              <th style="width:45px">Année</th>
-              <th style="width:65px">Couleur</th>
-              <th style="width:90px">KM</th>
-              <th style="width:90px">Location</th>
-              <th>Notes</th>
-              <th style="width:110px">Fournisseur</th>
-              <th style="width:110px">Client</th>
-              <th style="width:100px">Acheteur</th>
+              <th style="width:65px">Stock</th>
+              <th style="width:165px">Véhicule</th>
+              <th style="width:148px">VIN</th>
+              <th style="width:42px">Année</th>
+              <th style="width:58px">Couleur</th>
+              <th style="width:85px">KM</th>
+              <th style="width:105px">Location</th>
+              <th style="width:180px">Notes</th>
+              <th style="width:130px">Fournisseur</th>
+              <th style="width:120px">Client</th>
+              <th style="width:105px">Acheteur</th>
               <th style="width:18px"></th>
             </tr></thead>
             <tbody>
@@ -836,14 +837,14 @@ async function loadCDN() {
           <td><span class="stock-num copyable" onclick="copyText(event,'${v.stock}')" title="Copier">${v.stock}</span></td>
           <td><span class="vehicle-name">${v.vehicule}</span></td>
           <td><span class="vin-val copyable" onclick="copyText(event,'${v.vin||''}')" title="Copier VIN">${v.vin || '—'}</span></td>
-          <td class="cost-val">${v.annee || '—'}</td>
+          <td class="cost-val" style="white-space:nowrap;overflow:visible">${v.annee || '—'}</td>
           <td class="cost-val">${v.couleur || '—'}</td>
           <td class="km-cell">${v.km ? Number(v.km).toLocaleString('fr-CA') + ' km' : '—'}</td>
           <td class="cost-val">${v.location || '—'}</td>
           <td><span class="${notesCls}" title="${v.notes}">${v.notes || ''}</span></td>
-          <td class="cost-val">${v.fournisseur || '—'}</td>
-          <td class="cost-val">${v.client || '—'}</td>
-          <td class="cost-val">${v.acheteur || '—'}</td>
+          <td class="cost-val" title="${v.fournisseur}">${v.fournisseur || '—'}</td>
+          <td class="cost-val" title="${v.client}">${v.client || '—'}</td>
+          <td class="cost-val" title="${v.acheteur}">${v.acheteur || '—'}</td>
           <td style="color:var(--text3);font-size:10px;text-align:center">▾</td>
         </tr>
         <tr class="expand-panel" id="${rowId}" style="display:none">
