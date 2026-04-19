@@ -418,7 +418,7 @@
 <body>
 
 <header>
-  <div class="logo">BSM<span>.</span></div>
+  <div class="logo">BSM <span>Export</span></div>
   <div class="header-meta">
     <span><span class="status-dot"></span>Live</span>
     <span id="last-update">—</span>
@@ -746,15 +746,18 @@ async function loadCDN() {
           </div>
           <table>
             <thead><tr>
-              <th style="width:80px">Stock</th>
+              <th style="width:75px">Stock</th>
               <th>Véhicule</th>
-              <th style="width:55px">Année</th>
-              <th style="width:80px">Couleur</th>
-              <th style="width:100px">KM</th>
-              <th style="width:110px">Location</th>
-              <th style="width:95px">Cost CAD</th>
+              <th style="width:50px">Année</th>
+              <th style="width:75px">Couleur</th>
+              <th style="width:95px">KM</th>
+              <th style="width:100px">Location</th>
+              <th style="width:155px">VIN</th>
+              <th style="width:100px">Fournisseur</th>
+              <th style="width:100px">Client</th>
+              <th style="width:100px">Acheteur</th>
               <th>Notes</th>
-              <th style="width:24px"></th>
+              <th style="width:20px"></th>
             </tr></thead>
             <tbody>
       `;
@@ -770,24 +773,27 @@ async function loadCDN() {
           <td class="cost-val">${v.couleur || '—'}</td>
           <td class="km-cell">${v.km ? Number(v.km).toLocaleString('fr-CA') + ' km' : '—'}</td>
           <td class="cost-val">${v.location || '—'}</td>
-          <td class="cost-val">${v.costCad ? fmtCAD(v.costCad) : '—'}</td>
+          <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);letter-spacing:0.5px">${v.vin || '—'}</td>
+          <td class="cost-val">${v.fournisseur || '—'}</td>
+          <td class="cost-val">${v.client || '—'}</td>
+          <td class="cost-val">${v.acheteur || '—'}</td>
           <td><span class="notes-cell" title="${v.notes}">${v.notes || '—'}</span></td>
           <td style="color:var(--text3);font-size:10px;text-align:center">▾</td>
         </tr>
         <tr class="expand-panel" id="${rowId}" style="display:none">
-          <td colspan="9">
+          <td colspan="12">
             <div class="expand-grid">
               <div class="expand-section">
                 <div class="expand-section-title">🔧 RECON</div>
                 <div class="expand-row"><span>Mécanique</span><span>${v.mec || '—'}</span></div>
                 <div class="expand-row"><span>Body</span><span>${v.body || '—'}</span></div>
                 <div class="expand-row"><span>Esthétique</span><span>${v.esthet || '—'}</span></div>
+                <div class="expand-row"><span>Rappel</span><span>${v.rappel || '—'}</span></div>
               </div>
               <div class="expand-section">
                 <div class="expand-section-title">📋 ADMIN</div>
                 <div class="expand-row"><span>REGS</span><span>${v.regs || '—'}</span></div>
                 <div class="expand-row"><span>CF + Lien</span><span>${v.cfLien ? '<a href="'+v.cfLien+'" target="_blank" style="color:var(--accent2)">Ouvrir ↗</a>' : '—'}</span></div>
-                <div class="expand-row"><span>Rappel</span><span>${v.rappel || '—'}</span></div>
               </div>
               <div class="expand-section">
                 <div class="expand-section-title">💰 TRANSACTION</div>
