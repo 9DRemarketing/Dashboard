@@ -810,7 +810,8 @@ async function loadCDN() {
 
     document.getElementById('cdn-table').innerHTML = html || '<div class="empty">Aucune donnée</div>';
   } catch(e) {
-    document.getElementById('cdn-table').innerHTML = `<div class="error">Erreur de chargement. Vérifier que le Google Sheet est public.<br><small>${e.message}</small></div>`;
+    document.getElementById('kpi-cdn').innerHTML = '';
+    document.getElementById('cdn-table').innerHTML = `<div class="error">❌ Erreur: ${e.message}<br><small>${e.stack}</small></div>`;
   }
 }
 
