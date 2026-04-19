@@ -959,6 +959,8 @@ async function loadUS() {
     // KPIs — exclure STRATTON
     const nonStratton = vehicles.filter(v => v.section !== 'STRATTON');
     const totalCostCad = nonStratton.reduce((s, v) => s + v.costCad, 0);
+    const tommyCostCad = nonStratton.filter(v => !v.acheteur || !v.acheteur.trim()).reduce((s, v) => s + v.costCad, 0);
+    const normandCostCad = nonStratton.filter(v => v.acheteur && v.acheteur.toUpperCase().includes('NORMAND')).reduce((s, v) => s + v.costCad, 0);
     const speedo = vehicles.filter(v => v.section === 'AT SPEEDO');
     const signal = vehicles.filter(v => v.section === 'AT SIGNAL');
     const div = vehicles.filter(v => v.section === 'AT DIV');
@@ -969,9 +971,17 @@ async function loadUS() {
     document.getElementById('kpi-us').innerHTML = `
       <div class="kpi-tableau highlight" style="flex:1">
         <div class="kpi-tableau-header">Portefeuille</div>
-        <div class="kpi-ligne">
+        <div class="kpi-ligne total-row">
           <span class="kpi-ligne-label">Coût Total CAD</span>
-          <span class="kpi-ligne-val accent" style="color:var(--accent-light)">${fmtCAD(totalCostCad)}</span>
+          <span class="kpi-ligne-val big" style="color:var(--accent-light)">${fmtCAD(totalCostCad)}</span>
+        </div>
+        <div class="kpi-ligne">
+          <span class="kpi-ligne-label"><span class="tag-tommy">TOMMY</span></span>
+          <span class="kpi-ligne-val blue">${fmtCAD(tommyCostCad)}</span>
+        </div>
+        <div class="kpi-ligne">
+          <span class="kpi-ligne-label"><span class="tag-normand">NORMAND</span></span>
+          <span class="kpi-ligne-val purple">${fmtCAD(normandCostCad)}</span>
         </div>
       </div>
       <div class="kpi-tableau tommy" style="flex:1">
