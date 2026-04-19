@@ -891,7 +891,7 @@ async function loadCDN() {
         </tr>
         <tr class="expand-panel" id="${rowId}" style="display:none">
           <td colspan="14">
-            <div class="expand-grid">
+            <div class="expand-grid" style="grid-template-columns:1fr 1fr">
               <div class="expand-section">
                 <div class="expand-section-title">🔧 RECON</div>
                 <div class="expand-row"><span>Mécanique</span><span>${v.mec || '—'}</span></div>
@@ -900,21 +900,12 @@ async function loadCDN() {
                 <div class="expand-row"><span>Rappel</span><span>${v.rappel || '—'}</span></div>
               </div>
               <div class="expand-section">
-                <div class="expand-section-title">📋 ADMIN</div>
-                <div class="expand-row"><span>REGS</span><span>${v.regs || '—'}</span></div>
-                <div class="expand-row"><span>CF + Lien</span><span>${v.cfLien ? '<a href="'+v.cfLien+'" target="_blank" style="color:var(--accent2)">Ouvrir ↗</a>' : '—'}</span></div>
-              </div>
-              <div class="expand-section">
                 <div class="expand-section-title">💰 TRANSACTION</div>
                 <div class="expand-row"><span>Fournisseur</span><span>${v.fournisseur || '—'}</span></div>
                 <div class="expand-row"><span>Client</span><span>${v.client || '—'}</span></div>
                 <div class="expand-row"><span>Acheteur</span><span>${v.acheteur || '—'}</span></div>
                 <div class="expand-row"><span>Cost CAD</span><span style="color:var(--text2)">${v.costCad ? fmtCAD(v.costCad) : '—'}</span></div>
                 <div class="expand-row"><span>Profit CAD</span><span style="color:${profitColor};font-weight:600">${profitFmt}</span></div>
-              </div>
-              <div class="expand-section">
-                <div class="expand-section-title">🔑 VIN</div>
-                <div class="expand-row vin-row"><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text);letter-spacing:1px">${v.vin || '—'}</span></div>
               </div>
             </div>
           </td>
