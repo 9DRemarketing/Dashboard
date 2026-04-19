@@ -269,6 +269,17 @@
     color: var(--accent) !important;
     text-decoration: underline dotted;
   }
+  .badge-admin {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    background: rgba(71,255,154,0.08);
+    border: 1px solid rgba(71,255,154,0.2);
+    color: var(--green);
+    white-space: nowrap;
+  }
   .vin-val {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
@@ -814,15 +825,17 @@ async function loadCDN() {
             <thead><tr>
               <th style="width:65px">Stock</th>
               <th style="width:165px">Véhicule</th>
-              <th style="width:148px">VIN</th>
+              <th style="width:140px">VIN</th>
               <th style="width:42px">Année</th>
-              <th style="width:58px">Couleur</th>
-              <th style="width:85px">KM</th>
-              <th style="width:105px">Location</th>
-              <th style="width:180px">Notes</th>
-              <th style="width:130px">Fournisseur</th>
-              <th style="width:120px">Client</th>
-              <th style="width:105px">Acheteur</th>
+              <th style="width:55px">Couleur</th>
+              <th style="width:80px">KM</th>
+              <th style="width:85px">Location</th>
+              <th style="width:175px">Notes</th>
+              <th style="width:55px">REGS</th>
+              <th style="width:55px">CF+Lien</th>
+              <th style="width:120px">Fournisseur</th>
+              <th style="width:115px">Client</th>
+              <th style="width:85px">Acheteur</th>
               <th style="width:18px"></th>
             </tr></thead>
             <tbody>
@@ -842,13 +855,15 @@ async function loadCDN() {
           <td class="km-cell">${v.km ? Number(v.km).toLocaleString('fr-CA') + ' km' : '—'}</td>
           <td class="cost-val">${v.location || '—'}</td>
           <td><span class="${notesCls}" title="${v.notes}">${v.notes || ''}</span></td>
+          <td class="cost-val" style="text-align:center">${v.regs ? `<span class="badge-admin">${v.regs}</span>` : '—'}</td>
+          <td style="text-align:center">${v.cfLien ? `<a href="${v.cfLien}" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent2);font-family:'DM Mono',monospace;font-size:10px;text-decoration:none" title="${v.cfLien}">↗ Lien</a>` : '<span style="color:var(--text3)">—</span>'}</td>
           <td class="cost-val" title="${v.fournisseur}">${v.fournisseur || '—'}</td>
           <td class="cost-val" title="${v.client}">${v.client || '—'}</td>
           <td class="cost-val" title="${v.acheteur}">${v.acheteur || '—'}</td>
           <td style="color:var(--text3);font-size:10px;text-align:center">▾</td>
         </tr>
         <tr class="expand-panel" id="${rowId}" style="display:none">
-          <td colspan="12">
+          <td colspan="14">
             <div class="expand-grid">
               <div class="expand-section">
                 <div class="expand-section-title">🔧 RECON</div>
