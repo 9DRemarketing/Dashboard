@@ -247,6 +247,51 @@
     color: var(--text3);
   }
 
+  /* EXPANDABLE ROW */
+  .expandable-row { cursor: pointer; }
+  .expandable-row:hover td { background: rgba(232,255,71,0.03) !important; }
+  .expand-panel td { padding: 0 !important; border-bottom: 2px solid var(--border) !important; }
+  .expand-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    background: rgba(10,10,20,0.6);
+  }
+  .expand-section {
+    padding: 14px 16px;
+    border-right: 1px solid var(--border);
+  }
+  .expand-section:last-child { border-right: none; }
+  .expand-section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .expand-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 4px 0;
+    font-size: 11px;
+    gap: 8px;
+  }
+  .expand-row span:first-child {
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .expand-row span:last-child { color: var(--text); text-align: right; }
+  .vin-row { margin-top: 4px; }
+
   /* SEARCH */
   .search-bar {
     width: 100%;
@@ -478,6 +523,13 @@ function switchTab(tab) {
   document.getElementById('panel-' + tab).classList.add('active');
 }
 
+function toggleExpand(rowId) {
+  const panel = document.getElementById(rowId);
+  if (!panel) return;
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'table-row';
+}
+
 function filterTable(containerId, query) {
   const q = query.toLowerCase();
   const container = document.getElementById(containerId);
@@ -568,9 +620,11 @@ async function loadCDN() {
         vehicles.push({
           stock: row[0], vehicule: row[1], vin: row[2], annee: row[3],
           couleur: row[4], km: row[5], location: row[6], notes: row[7],
+          rappel: row[8] || '', mec: row[9] || '', body: row[10] || '',
+          esthet: row[11] || '', cfLien: row[12] || '', regs: row[13] || '',
+          fournisseur: row[14] || '', client: row[15] || '', acheteur: row[16] || '',
           costCad: parseNum(row[17]), profitCad: parseNum(row[18]),
-          statut: row[19] || '', section: currentSection,
-          fournisseur: row[14] || '', client: row[15] || '', acheteur: row[16] || ''
+          statut: row[19] || '', section: currentSection
         });
       }
     }
@@ -692,25 +746,67 @@ async function loadCDN() {
           </div>
           <table>
             <thead><tr>
-              <th>Stock</th><th>Véhicule</th><th>Année</th><th>Couleur</th><th>KM</th>
-              <th>Location</th><th>Cost CAD</th><th>Statut</th><th>Notes</th>
+              <th style="width:80px">Stock</th>
+              <th>Véhicule</th>
+              <th style="width:55px">Année</th>
+              <th style="width:80px">Couleur</th>
+              <th style="width:100px">KM</th>
+              <th style="width:110px">Location</th>
+              <th style="width:95px">Cost CAD</th>
+              <th>Notes</th>
+              <th style="width:24px"></th>
             </tr></thead>
             <tbody>
       `;
       for (const v of sections[sec]) {
-        html += `<tr class="data-row">
+        const rowId = 'row-' + v.stock.replace(/\W/g,'');
+        const profitColor = v.profitCad > 0 ? 'var(--green)' : v.profitCad < 0 ? 'var(--red)' : 'var(--text3)';
+        const profitFmt = v.profitCad !== 0 ? (v.profitCad > 0 ? '+' : '') + fmtCAD(v.profitCad) : '—';
+        html += `
+        <tr class="data-row expandable-row" onclick="toggleExpand('${rowId}')">
           <td><span class="stock-num">${v.stock}</span></td>
           <td><span class="vehicle-name">${v.vehicule}</span></td>
-          <td class="cost-val">${v.annee}</td>
-          <td class="cost-val">${v.couleur}</td>
+          <td class="cost-val">${v.annee || '—'}</td>
+          <td class="cost-val">${v.couleur || '—'}</td>
           <td class="km-cell">${v.km ? Number(v.km).toLocaleString('fr-CA') + ' km' : '—'}</td>
           <td class="cost-val">${v.location || '—'}</td>
           <td class="cost-val">${v.costCad ? fmtCAD(v.costCad) : '—'}</td>
-          <td>${statusBadge(v.statut)}</td>
           <td><span class="notes-cell" title="${v.notes}">${v.notes || '—'}</span></td>
+          <td style="color:var(--text3);font-size:10px;text-align:center">▾</td>
+        </tr>
+        <tr class="expand-panel" id="${rowId}" style="display:none">
+          <td colspan="9">
+            <div class="expand-grid">
+              <div class="expand-section">
+                <div class="expand-section-title">🔧 RECON</div>
+                <div class="expand-row"><span>Mécanique</span><span>${v.mec || '—'}</span></div>
+                <div class="expand-row"><span>Body</span><span>${v.body || '—'}</span></div>
+                <div class="expand-row"><span>Esthétique</span><span>${v.esthet || '—'}</span></div>
+              </div>
+              <div class="expand-section">
+                <div class="expand-section-title">📋 ADMIN</div>
+                <div class="expand-row"><span>REGS</span><span>${v.regs || '—'}</span></div>
+                <div class="expand-row"><span>CF + Lien</span><span>${v.cfLien ? '<a href="'+v.cfLien+'" target="_blank" style="color:var(--accent2)">Ouvrir ↗</a>' : '—'}</span></div>
+                <div class="expand-row"><span>Rappel</span><span>${v.rappel || '—'}</span></div>
+              </div>
+              <div class="expand-section">
+                <div class="expand-section-title">💰 TRANSACTION</div>
+                <div class="expand-row"><span>Fournisseur</span><span>${v.fournisseur || '—'}</span></div>
+                <div class="expand-row"><span>Client</span><span>${v.client || '—'}</span></div>
+                <div class="expand-row"><span>Acheteur</span><span>${v.acheteur || '—'}</span></div>
+                <div class="expand-row"><span>Cost CAD</span><span style="color:var(--text2)">${v.costCad ? fmtCAD(v.costCad) : '—'}</span></div>
+                <div class="expand-row"><span>Profit CAD</span><span style="color:${profitColor};font-weight:600">${profitFmt}</span></div>
+              </div>
+              <div class="expand-section">
+                <div class="expand-section-title">🔑 VIN</div>
+                <div class="expand-row vin-row"><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text);letter-spacing:1px">${v.vin || '—'}</span></div>
+              </div>
+            </div>
+          </td>
         </tr>`;
       }
       html += `</tbody></table></div>`;
+    }
     }
 
     document.getElementById('cdn-table').innerHTML = html || '<div class="empty">Aucune donnée</div>';
