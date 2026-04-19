@@ -864,10 +864,20 @@ async function loadCDN() {
           <td class="km-cell">${v.km ? Number(v.km).toLocaleString('fr-CA') + ' km' : '—'}</td>
           <td class="cost-val">${v.location || '—'}</td>
           <td><span class="${notesCls}" title="${v.notes}">${v.notes || ''}</span></td>
-          <td style="text-align:center">${v.cfLien ? `<a href="${v.cfLien}" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent2);font-family:'DM Mono',monospace;font-size:10px;text-decoration:none" title="${v.cfLien}">↗ Lien</a>` : '<span style="color:var(--text3)">—</span>'}</td>
+          <td style="text-align:center">${(()=>{
+            const cf = (v.cfLien||'').trim().toUpperCase();
+            if(!cf || cf==='—') return '<span class="regs-afaire">N/A</span>';
+            if(cf==='FAIT') return '<span class="regs-fait">FAIT</span>';
+            if(cf.includes('À FAIRE')) return '<span class="regs-afaire">À FAIRE</span>';
+            if(cf.includes('À VÉRIF') || cf.includes('A VERIF')) return '<span class="regs-averif">À VÉRIF</span>';
+            if(cf==='N/A') return '<span class="regs-na">N/A</span>';
+            // Si c'est une URL, afficher lien
+            if(cf.startsWith('HTTP')) return `<a href="${v.cfLien}" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent2);font-family:'DM Mono',monospace;font-size:10px;text-decoration:none">↗ Lien</a>`;
+            return `<span class="regs-na">${v.cfLien}</span>`;
+          })()}</td>
           <td style="text-align:center">${(()=>{
             const r = (v.regs||'').trim().toUpperCase();
-            if(!r || r==='—') return '<span style="color:var(--text3)">—</span>';
+            if(!r || r==='—' || r==='') return '<span class="regs-afaire">—</span>';
             if(r==='FAIT') return '<span class="regs-fait">FAIT</span>';
             if(r.includes('À FAIRE')) return '<span class="regs-afaire">À FAIRE</span>';
             if(r.includes('À VÉRIF') || r.includes('A VERIF')) return '<span class="regs-averif">À VÉRIF</span>';
