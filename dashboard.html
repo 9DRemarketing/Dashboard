@@ -948,9 +948,10 @@ async function loadUS() {
           arrival: row[7] || '', submit: row[8] || '', release: row[9] || '',
           sold: row[10] || '', payment: row[11] || '', counter: row[12] || '',
           client: row[13] || '', acheteur: row[14] || '',
-          costUsd: parseNum(row[15]), costCad: parseNum(row[16]),
-          sellCad: parseNum(row[17]), profitCad: parseNum(row[18]),
-          regs: row[19] || '', cfLien: row[20] || '',
+          costUsd: parseNum(row[15]), sellUsd: parseNum(row[16]),
+          costCad: parseNum(row[17]), sellCad: parseNum(row[18]),
+          profitCad: parseNum(row[19]),
+          regs: row[20] || '', cfLien: row[21] || '',
           section: currentSection
         });
       }
@@ -1135,6 +1136,7 @@ async function loadUS() {
               <div class="expand-section" style="min-width:280px;max-width:360px">
                 <div class="expand-section-title">💰 TRANSACTION</div>
                 <div class="expand-row"><span>Cost USD</span><span style="color:var(--accent-light)">${v.costUsd ? fmtUSD(v.costUsd) : '—'}</span></div>
+                <div class="expand-row"><span>Sell Price USD</span><span style="color:var(--accent-light)">${v.sellUsd ? fmtUSD(v.sellUsd) : '—'}</span></div>
                 <div class="expand-row"><span>Cost CAD</span><span style="color:var(--accent2)">${v.costCad ? fmtCAD(v.costCad) : '—'}</span></div>
                 <div class="expand-row"><span>Sell Price CAD</span><span style="color:var(--text2)">${v.sellCad ? fmtCAD(v.sellCad) : '—'}</span></div>
                 <div class="expand-row"><span>Profit CAD</span><span style="color:${profitColor};font-weight:600">${profitFmt}</span></div>
