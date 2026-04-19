@@ -880,7 +880,7 @@ async function loadCDN() {
             if(!r || r==='—' || r==='') return '<span class="regs-afaire">—</span>';
             if(r==='FAIT') return '<span class="regs-fait">FAIT</span>';
             if(r.includes('À FAIRE')) return '<span class="regs-afaire">À FAIRE</span>';
-            if(r.includes('À VÉRIF') || r.includes('A VERIF')) return '<span class="regs-averif">À VÉRIF</span>';
+            if(r.includes('À VÉRIF') || r.includes('A VERIF') || r==='X' || r.includes('SCAN')) return `<span class="regs-averif">${v.regs}</span>`;
             if(r==='N/A') return '<span class="regs-na">N/A</span>';
             return `<span class="regs-na">${v.regs}</span>`;
           })()}</td>
