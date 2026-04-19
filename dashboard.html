@@ -269,16 +269,25 @@
     color: var(--accent) !important;
     text-decoration: underline dotted;
   }
-  .badge-admin {
-    display: inline-block;
-    padding: 1px 6px;
-    border-radius: 3px;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    background: rgba(71,255,154,0.08);
-    border: 1px solid rgba(71,255,154,0.2);
-    color: var(--green);
-    white-space: nowrap;
+  .regs-fait {
+    display:inline-block; padding:2px 6px; border-radius:3px;
+    font-family:'DM Mono',monospace; font-size:10px; font-weight:600;
+    background:rgba(71,255,154,0.1); border:1px solid rgba(71,255,154,0.3); color:var(--green);
+  }
+  .regs-afaire {
+    display:inline-block; padding:2px 6px; border-radius:3px;
+    font-family:'DM Mono',monospace; font-size:10px; font-weight:600;
+    background:rgba(255,71,71,0.12); border:1px solid rgba(255,71,71,0.3); color:var(--red);
+  }
+  .regs-averif {
+    display:inline-block; padding:2px 6px; border-radius:3px;
+    font-family:'DM Mono',monospace; font-size:10px; font-weight:600;
+    background:rgba(255,204,71,0.1); border:1px solid rgba(255,204,71,0.3); color:var(--yellow);
+  }
+  .regs-na {
+    display:inline-block; padding:2px 6px; border-radius:3px;
+    font-family:'DM Mono',monospace; font-size:10px;
+    color:var(--text3);
   }
   .vin-val {
     font-family: 'DM Mono', monospace;
@@ -831,8 +840,8 @@ async function loadCDN() {
               <th style="width:80px">KM</th>
               <th style="width:85px">Location</th>
               <th style="width:175px">Notes</th>
-              <th style="width:55px">REGS</th>
               <th style="width:55px">CF+Lien</th>
+              <th style="width:55px">REGS</th>
               <th style="width:120px">Fournisseur</th>
               <th style="width:115px">Client</th>
               <th style="width:85px">Acheteur</th>
@@ -855,8 +864,16 @@ async function loadCDN() {
           <td class="km-cell">${v.km ? Number(v.km).toLocaleString('fr-CA') + ' km' : '—'}</td>
           <td class="cost-val">${v.location || '—'}</td>
           <td><span class="${notesCls}" title="${v.notes}">${v.notes || ''}</span></td>
-          <td class="cost-val" style="text-align:center">${v.regs ? `<span class="badge-admin">${v.regs}</span>` : '—'}</td>
           <td style="text-align:center">${v.cfLien ? `<a href="${v.cfLien}" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent2);font-family:'DM Mono',monospace;font-size:10px;text-decoration:none" title="${v.cfLien}">↗ Lien</a>` : '<span style="color:var(--text3)">—</span>'}</td>
+          <td style="text-align:center">${(()=>{
+            const r = (v.regs||'').trim().toUpperCase();
+            if(!r || r==='—') return '<span style="color:var(--text3)">—</span>';
+            if(r==='FAIT') return '<span class="regs-fait">FAIT</span>';
+            if(r.includes('À FAIRE')) return '<span class="regs-afaire">À FAIRE</span>';
+            if(r.includes('À VÉRIF') || r.includes('A VERIF')) return '<span class="regs-averif">À VÉRIF</span>';
+            if(r==='N/A') return '<span class="regs-na">N/A</span>';
+            return `<span class="regs-na">${v.regs}</span>`;
+          })()}</td>
           <td class="cost-val" title="${v.fournisseur}">${v.fournisseur || '—'}</td>
           <td class="cost-val" title="${v.client}">${v.client || '—'}</td>
           <td class="cost-val" title="${v.acheteur}">${v.acheteur || '—'}</td>
