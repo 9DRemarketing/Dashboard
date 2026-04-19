@@ -123,20 +123,25 @@
   .tab-panel.active { display: block; }
 
   /* KPI CARDS */
+  .kpi-block { margin-bottom: 20px; }
   .kpi-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
-    margin-bottom: 24px;
+    gap: 10px;
+    margin-bottom: 10px;
   }
+  .kpi-row-1 { grid-template-columns: repeat(6, 1fr); }
+  .kpi-row-2 { grid-template-columns: repeat(4, 1fr); }
   .kpi-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 16px 18px;
+    padding: 14px 16px;
     transition: border-color 0.2s;
   }
-  .kpi-card:hover { border-color: var(--border); }
+  .kpi-card.highlight { border-color: rgba(232,255,71,0.2); background: rgba(232,255,71,0.03); }
+  .kpi-card.tommy { border-color: rgba(71,200,255,0.2); background: rgba(71,200,255,0.03); }
+  .kpi-card.normand { border-color: rgba(199,71,255,0.2); background: rgba(199,71,255,0.03); }
+  .kpi-card:hover { border-color: var(--accent); }
   .kpi-label {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
@@ -145,9 +150,19 @@
     letter-spacing: 0.5px;
     margin-bottom: 8px;
   }
+  .kpi-label .owner-tag {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 9px;
+    margin-right: 4px;
+    font-weight: 600;
+  }
+  .tag-tommy { background: rgba(71,200,255,0.15); color: var(--accent2); }
+  .tag-normand { background: rgba(199,71,255,0.15); color: #c847ff; }
   .kpi-value {
     font-family: 'Syne', sans-serif;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
     color: var(--text);
     line-height: 1;
@@ -156,10 +171,18 @@
   .kpi-value.green { color: var(--green); }
   .kpi-value.red { color: var(--red); }
   .kpi-value.blue { color: var(--accent2); }
+  .kpi-value.purple { color: #c847ff; }
   .kpi-sub {
     font-size: 11px;
     color: var(--text3);
-    margin-top: 4px;
+    margin-top: 5px;
+    font-family: 'DM Mono', monospace;
+  }
+  .kpi-sub span { color: var(--text2); }
+  .kpi-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 4px 0 10px;
   }
 
   /* SECTION HEADER */
@@ -338,7 +361,7 @@
 
   <!-- CDN TAB -->
   <div class="tab-panel active" id="panel-cdn">
-    <div class="kpi-row" id="kpi-cdn"></div>
+    <div class="kpi-block" id="kpi-cdn"></div>
     <input class="search-bar" type="text" placeholder="Rechercher stock, véhicule, fournisseur..." oninput="filterTable('cdn-table', this.value)">
     <div id="cdn-table"><div class="loading"><div class="loading-spinner"></div>Chargement...</div></div>
   </div>
@@ -441,14 +464,36 @@ async function loadCDN() {
     const rows = parseCSV(text);
 
     // Parse portfolio summary from first rows
-    let portefeuilleAlloue = 0, portefeuilleReel = 0, portefeuilleProj = 0, disponible = 0;
-    for (let i = 0; i < 8; i++) {
+    let portefeuilleAlloue = 0, portefeuilleReel = 0, portefeuilleProj = 0, disponible = 0, disponibleProj = 0;
+    let tommyReel = 0, tommyProj = 0, tommyAlloc = 0;
+    let normandReel = 0, normandProj = 0, normandAlloc = 0;
+    let advanceSignal = 0;
+    let tommyCount = 0, tommyMax = 0, normandCount = 0, normandMax = 0;
+    let detailCount = 0, detailMax = 0, ontarioCount = 0, ontarioMax = 0;
+
+    for (let i = 0; i < 10; i++) {
       const r = rows[i] || [];
       const joined = r.join('|').toLowerCase();
+
       if (joined.includes('portfeuille alloué') || joined.includes('portefeuille alloué')) portefeuilleAlloue = parseNum(r[2]);
-      if (joined.includes('portefeuille réel')) portefeuilleReel = parseNum(r[2]);
-      if (joined.includes('portefeuille projeté') || joined.includes('projett')) portefeuilleProj = parseNum(r[6]);
-      if (joined.includes('disponible réel')) disponible = parseNum(r[2]);
+      if (joined.includes('portefeuille réel') && !joined.includes('tommy') && !joined.includes('normand')) portefeuilleReel = parseNum(r[2]);
+      if (joined.includes('portefeuille projeté') || joined.includes('projetté')) portefeuilleProj = parseNum(r[6]);
+      if (joined.includes('disponible réel') || (joined.includes('disponible') && !joined.includes('projeté'))) disponible = parseNum(r[2]);
+      if (joined.includes('disponible projeté')) disponibleProj = parseNum(r[6]);
+      if (joined.includes('tommy réel') || joined.includes('tommy reel')) { tommyReel = parseNum(r[2]); tommyAlloc = parseNum(r[1].replace(/[^0-9,]/g,'')); }
+      if (joined.includes('tommy projetté') || joined.includes('tommy projeté')) tommyProj = parseNum(r[6]);
+      if (joined.includes('normand réel') || joined.includes('normand reel')) { normandReel = parseNum(r[2]); normandAlloc = parseNum(r[1].replace(/[^0-9,]/g,'')); }
+      if (joined.includes('normand projetté') || joined.includes('normand projeté')) normandProj = parseNum(r[6]);
+      if (joined.includes('advance signal')) advanceSignal = parseNum(r[2]);
+
+      // Counters: TOMMY / NORMAND / DÉTAIL / ONTARIO in columns further right
+      for (let c = 0; c < r.length; c++) {
+        const cell = (r[c] || '').toUpperCase().trim();
+        if (cell === 'TOMMY') { tommyCount = parseNum(r[c+1]); tommyMax = parseNum(r[c+2]); }
+        if (cell === 'NORMAND') { normandCount = parseNum(r[c+1]); normandMax = parseNum(r[c+2]); }
+        if (cell === 'DÉTAIL' || cell === 'DETAIL') { detailCount = parseNum(r[c+1]); detailMax = parseNum(r[c+2]); }
+        if (cell === 'ONTARIO') { ontarioCount = parseNum(r[c+1]); ontarioMax = parseNum(r[c+2]); }
+      }
     }
 
     // Find all data rows (stock numbers starting with B)
@@ -491,15 +536,83 @@ async function loadCDN() {
       }
     }
 
-    // KPIs
+    // KPIs — 2 rangées
     const kpiEl = document.getElementById('kpi-cdn');
-    kpiEl.innerHTML = `
-      <div class="kpi-card"><div class="kpi-label">Portefeuille Alloué</div><div class="kpi-value accent">${fmtCAD(portefeuilleAlloue)}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Portefeuille Réel</div><div class="kpi-value">${fmtCAD(portefeuilleReel)}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Portefeuille Projeté</div><div class="kpi-value blue">${fmtCAD(portefeuilleProj)}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Disponible Réel</div><div class="kpi-value ${disponible >= 0 ? 'green' : 'red'}">${fmtCAD(disponible)}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Véhicules en Inventaire</div><div class="kpi-value">${vehicles.length}</div></div>
+
+    // Rangée 1 : Totaux portefeuille (6 cartes)
+    const row1 = `
+      <div class="kpi-row kpi-row-1">
+        <div class="kpi-card highlight">
+          <div class="kpi-label">Portefeuille Alloué</div>
+          <div class="kpi-value accent">${fmtCAD(portefeuilleAlloue)}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Portefeuille Réel</div>
+          <div class="kpi-value">${fmtCAD(portefeuilleReel)}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Portefeuille Projeté</div>
+          <div class="kpi-value blue">${fmtCAD(portefeuilleProj)}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Disponible Réel</div>
+          <div class="kpi-value ${disponible >= 0 ? 'green' : 'red'}">${fmtCAD(disponible)}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Disponible Projeté</div>
+          <div class="kpi-value ${disponibleProj >= 0 ? 'green' : 'red'}">${fmtCAD(disponibleProj)}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Véhicules CDN</div>
+          <div class="kpi-value">${vehicles.length}</div>
+          <div class="kpi-sub">en inventaire</div>
+        </div>
+      </div>
     `;
+
+    // Rangée 2 : Tommy / Normand / Advance / Compteurs (4 cartes)
+    const row2 = `
+      <div class="kpi-row kpi-row-2">
+        <div class="kpi-card tommy">
+          <div class="kpi-label"><span class="owner-tag tag-tommy">TOMMY</span> Portefeuille</div>
+          <div class="kpi-value blue">${fmtCAD(tommyReel)}</div>
+          <div class="kpi-sub">Projeté <span>${fmtCAD(tommyProj)}</span></div>
+        </div>
+        <div class="kpi-card normand">
+          <div class="kpi-label"><span class="owner-tag tag-normand">NORMAND</span> Portefeuille</div>
+          <div class="kpi-value purple">${fmtCAD(normandReel)}</div>
+          <div class="kpi-sub">Projeté <span>${fmtCAD(normandProj)}</span></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Advance Signal</div>
+          <div class="kpi-value yellow" style="color:var(--yellow)">${fmtCAD(advanceSignal)}</div>
+          <div class="kpi-sub">avance en cours</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Compteurs</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px">
+            <div>
+              <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace">TOMMY</div>
+              <div style="font-family:'Syne',sans-serif;font-size:16px;color:var(--accent2)">${tommyCount || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace"> /${tommyMax || '—'}</span></div>
+            </div>
+            <div>
+              <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace">NORMAND</div>
+              <div style="font-family:'Syne',sans-serif;font-size:16px;color:#c847ff">${normandCount || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace"> /${normandMax || '—'}</span></div>
+            </div>
+            <div>
+              <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace">DÉTAIL</div>
+              <div style="font-family:'Syne',sans-serif;font-size:16px;color:var(--green)">${detailCount || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace"> /${detailMax || '—'}</span></div>
+            </div>
+            <div>
+              <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace">ONTARIO</div>
+              <div style="font-family:'Syne',sans-serif;font-size:16px;color:var(--yellow)">${ontarioCount || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace"> /${ontarioMax || '—'}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    kpiEl.innerHTML = row1 + row2;
 
     document.getElementById('badge-cdn').textContent = vehicles.length;
 
