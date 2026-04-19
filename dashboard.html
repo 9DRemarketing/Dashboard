@@ -959,7 +959,10 @@ async function loadUS() {
     // KPIs — exclure STRATTON
     const nonStratton = vehicles.filter(v => v.section !== 'STRATTON');
     const totalCostCad = nonStratton.reduce((s, v) => s + v.costCad, 0);
-    const tommyCostCad = nonStratton.filter(v => !v.acheteur || !v.acheteur.trim()).reduce((s, v) => s + v.costCad, 0);
+    const tommyCostCad = nonStratton.filter(v => {
+      const a = (v.acheteur || '').toUpperCase().trim();
+      return !a || a.includes('DANY') || a.includes('BRUNONE');
+    }).reduce((s, v) => s + v.costCad, 0);
     const normandCostCad = nonStratton.filter(v => v.acheteur && v.acheteur.toUpperCase().includes('NORMAND')).reduce((s, v) => s + v.costCad, 0);
     const speedo = vehicles.filter(v => v.section === 'AT SPEEDO');
     const signal = vehicles.filter(v => v.section === 'AT SIGNAL');
