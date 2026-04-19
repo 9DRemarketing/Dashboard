@@ -322,12 +322,11 @@
   .expand-panel td { padding: 0 !important; border-bottom: 2px solid var(--border) !important; }
   .expand-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
     gap: 0;
     background: rgba(10,10,20,0.6);
   }
   .expand-section {
-    padding: 14px 16px;
+    padding: 10px 16px;
     border-right: 1px solid var(--border);
   }
   .expand-section:last-child { border-right: none; }
@@ -338,17 +337,17 @@
     color: var(--text2);
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    margin-bottom: 10px;
-    padding-bottom: 6px;
+    margin-bottom: 8px;
+    padding-bottom: 5px;
     border-bottom: 1px solid var(--border);
   }
   .expand-row {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    padding: 4px 0;
+    align-items: center;
+    padding: 3px 0;
     font-size: 11px;
-    gap: 8px;
+    gap: 16px;
   }
   .expand-row span:first-child {
     color: var(--text3);
@@ -891,15 +890,15 @@ async function loadCDN() {
         </tr>
         <tr class="expand-panel" id="${rowId}" style="display:none">
           <td colspan="14">
-            <div class="expand-grid" style="grid-template-columns:1fr 1fr">
-              <div class="expand-section">
+            <div class="expand-grid" style="grid-template-columns:auto auto;justify-content:start;gap:0">
+              <div class="expand-section" style="min-width:280px;max-width:320px">
                 <div class="expand-section-title">🔧 RECON</div>
                 <div class="expand-row"><span>Mécanique</span><span>${v.mec || '—'}</span></div>
                 <div class="expand-row"><span>Body</span><span>${v.body || '—'}</span></div>
                 <div class="expand-row"><span>Esthétique</span><span>${v.esthet || '—'}</span></div>
                 <div class="expand-row"><span>Rappel</span><span>${v.rappel || '—'}</span></div>
               </div>
-              <div class="expand-section">
+              <div class="expand-section" style="min-width:280px;max-width:340px">
                 <div class="expand-section-title">💰 TRANSACTION</div>
                 <div class="expand-row"><span>Fournisseur</span><span>${v.fournisseur || '—'}</span></div>
                 <div class="expand-row"><span>Client</span><span>${v.client || '—'}</span></div>
