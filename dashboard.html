@@ -184,7 +184,38 @@
   .tag-tommy { background: rgba(71,200,255,0.15); color: var(--accent2); padding: 1px 6px; border-radius: 3px; font-size: 9px; font-family: 'DM Mono', monospace; }
   .tag-normand { background: rgba(199,71,255,0.15); color: #c847ff; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-family: 'DM Mono', monospace; }
 
-  /* SECTION HEADER */
+  /* KPI CARDS (US + Offers tabs) */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .kpi-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .kpi-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+  }
+  .kpi-value.accent { color: var(--accent); }
+  .kpi-value.green { color: var(--green); }
+  .kpi-value.red { color: var(--red); }
+  .kpi-value.blue { color: var(--accent2); }
   .section-header {
     display: flex;
     align-items: center;
