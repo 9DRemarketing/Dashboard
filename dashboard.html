@@ -1196,14 +1196,7 @@ async function loadOffers() {
     const avgProfit = profitOffers.length ? Math.round(totalProfit / profitOffers.length) : 0;
     const encan = offers.filter(o => o.statut.toUpperCase().includes('ENCAN')).length;
 
-    document.getElementById('kpi-offers').innerHTML = `
-      <div class="kpi-card"><div class="kpi-label">Total Offres Actives</div><div class="kpi-value">${totalOffers}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Profit Total CAD</div><div class="kpi-value ${totalProfit >= 0 ? 'green' : 'red'}">${fmtCAD(totalProfit)}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Profit Moyen</div><div class="kpi-value" style="color:var(--accent2)">${fmtCAD(avgProfit)}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Offres Positives</div><div class="kpi-value" style="color:var(--green)">${profitOffers.length}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Encan</div><div class="kpi-value" style="color:var(--yellow)">${encan}</div></div>
-    `;
-
+    document.getElementById('kpi-offers').innerHTML = '';
     document.getElementById('badge-offers').textContent = totalOffers;
 
     // Grouper par stock
@@ -1242,14 +1235,15 @@ async function loadOffers() {
           <table style="table-layout:fixed;width:100%">
             <thead><tr>
               <th style="width:110px">Client</th>
-              <th style="width:70px">Date</th>
+              <th style="width:65px">Date</th>
+              <th style="width:88px">MMR</th>
               <th style="width:90px">Prix Demandé</th>
               <th style="width:88px">Offre USD</th>
               <th style="width:88px">Offre CAD</th>
-              <th style="width:70px">Diff MMR</th>
+              <th style="width:85px">Diff MMR</th>
               <th style="width:60px">Frais</th>
               <th style="width:55px">Comm</th>
-              <th style="width:95px">Profit</th>
+              <th style="width:105px">Profit</th>
               <th>Notes</th>
               <th style="width:75px">Statut</th>
             </tr></thead>
@@ -1270,6 +1264,7 @@ async function loadOffers() {
         html += `<tr class="data-row" style="${isMax ? 'background:rgba(52,211,153,0.05);' : ''}">
           <td style="color:var(--accent2);font-weight:500;font-size:12px">${o.client || '—'}</td>
           <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)">${o.date || '—'}</td>
+          <td class="cost-val">${o.mmr ? fmtCAD(o.mmr) : '—'}</td>
           <td class="cost-val">${o.prixDemande ? fmtCAD(o.prixDemande) : '—'}</td>
           <td class="cost-val">${o.offreUsd ? fmtUSD(o.offreUsd) : '—'}</td>
           <td class="cost-val">${o.offreCad ? fmtCAD(o.offreCad) : '—'}</td>
