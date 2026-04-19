@@ -383,10 +383,10 @@
     width: 6px; height: 6px;
     border-radius: 50%;
   }
-  table { width: 100%; border-collapse: collapse; }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
   th {
     text-align: left;
-    padding: 9px 12px;
+    padding: 8px 10px;
     font-family: 'DM Mono', monospace;
     font-size: 10px;
     color: var(--text3);
@@ -394,13 +394,17 @@
     letter-spacing: 0.5px;
     border-bottom: 1px solid var(--border);
     white-space: nowrap;
+    overflow: hidden;
     background: var(--surface2);
   }
   td {
-    padding: 9px 12px;
+    padding: 8px 10px;
     border-bottom: 1px solid rgba(42,42,58,0.5);
     color: var(--text);
     vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: rgba(255,255,255,0.02); }
@@ -805,20 +809,20 @@ async function loadCDN() {
             <span class="dot" style="background:${dotColor}"></span>
             ${sec} <span style="color:var(--text3);margin-left:8px">${sections[sec].length} unité${sections[sec].length > 1 ? 's' : ''}</span>
           </div>
-          <table>
+          <table style="table-layout:fixed;width:100%">
             <thead><tr>
-              <th style="width:75px">Stock</th>
-              <th>Véhicule</th>
-              <th style="width:155px">VIN</th>
-              <th style="width:50px">Année</th>
-              <th style="width:75px">Couleur</th>
-              <th style="width:95px">KM</th>
-              <th style="width:100px">Location</th>
-              <th style="width:200px">Notes</th>
-              <th style="width:100px">Fournisseur</th>
-              <th style="width:100px">Client</th>
+              <th style="width:70px">Stock</th>
+              <th style="width:180px">Véhicule</th>
+              <th style="width:145px">VIN</th>
+              <th style="width:45px">Année</th>
+              <th style="width:65px">Couleur</th>
+              <th style="width:90px">KM</th>
+              <th style="width:90px">Location</th>
+              <th>Notes</th>
+              <th style="width:110px">Fournisseur</th>
+              <th style="width:110px">Client</th>
               <th style="width:100px">Acheteur</th>
-              <th style="width:20px"></th>
+              <th style="width:18px"></th>
             </tr></thead>
             <tbody>
       `;
