@@ -968,8 +968,16 @@ async function loadUS() {
     const signal = vehicles.filter(v => v.section === 'AT SIGNAL');
     const div = vehicles.filter(v => v.section === 'AT DIV');
     const totalInv = speedo.length + signal.length + div.length;
-    const vendus = nonStratton.filter(v => v.client && v.client.trim()).length;
-    const nonVendus = nonStratton.filter(v => !v.client || !v.client.trim()).length;
+    const isTommy = (v) => { const a = (v.acheteur||'').toUpperCase().trim(); return !a || a.includes('DANY') || a.includes('BRUNONE'); };
+    const isNormand = (v) => (v.acheteur||'').toUpperCase().includes('NORMAND');
+    const vendusArr = nonStratton.filter(v => v.client && v.client.trim());
+    const nonVendusArr = nonStratton.filter(v => !v.client || !v.client.trim());
+    const vendusTotal = vendusArr.length;
+    const vendusTommy = vendusArr.filter(isTommy).length;
+    const vendusNormand = vendusArr.filter(isNormand).length;
+    const nonVendusTotal = nonVendusArr.length;
+    const nonVendusTommy = nonVendusArr.filter(isTommy).length;
+    const nonVendusNormand = nonVendusArr.filter(isNormand).length;
 
     document.getElementById('kpi-us').innerHTML = `
       <div class="kpi-tableau highlight" style="flex:1">
@@ -1008,13 +1016,29 @@ async function loadUS() {
       </div>
       <div class="kpi-tableau inventaire" style="flex:1">
         <div class="kpi-tableau-header">Répartition</div>
-        <div class="kpi-ligne">
+        <div class="kpi-ligne total-row">
           <span class="kpi-ligne-label">Vendus</span>
-          <span class="kpi-ligne-val green big">${vendus}</span>
+          <span class="kpi-ligne-val green big">${vendusTotal}</span>
         </div>
         <div class="kpi-ligne">
+          <span class="kpi-ligne-label"><span class="tag-tommy">TOMMY</span></span>
+          <span class="kpi-ligne-val blue">${vendusTommy}</span>
+        </div>
+        <div class="kpi-ligne">
+          <span class="kpi-ligne-label"><span class="tag-normand">NORMAND</span></span>
+          <span class="kpi-ligne-val purple">${vendusNormand}</span>
+        </div>
+        <div class="kpi-ligne total-row" style="margin-top:4px">
           <span class="kpi-ligne-label">Non vendus</span>
-          <span class="kpi-ligne-val red big">${nonVendus}</span>
+          <span class="kpi-ligne-val red big">${nonVendusTotal}</span>
+        </div>
+        <div class="kpi-ligne">
+          <span class="kpi-ligne-label"><span class="tag-tommy">TOMMY</span></span>
+          <span class="kpi-ligne-val blue">${nonVendusTommy}</span>
+        </div>
+        <div class="kpi-ligne">
+          <span class="kpi-ligne-label"><span class="tag-normand">NORMAND</span></span>
+          <span class="kpi-ligne-val purple">${nonVendusNormand}</span>
         </div>
       </div>
     `;
