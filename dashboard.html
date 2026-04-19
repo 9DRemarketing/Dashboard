@@ -477,31 +477,17 @@ async function loadCDN() {
       const r = rows[i] || [];
       const joined = r.join('|').toLowerCase();
 
-      // Portefeuille alloué — C2
       if (joined.includes('portfeuille alloué') || joined.includes('portefeuille alloué')) portefeuilleAlloue = parseNum(r[2]);
-      // Portefeuille réel — C2 de sa ligne
       if (joined.includes('portefeuille réel') && !joined.includes('tommy') && !joined.includes('normand')) portefeuilleReel = parseNum(r[2]);
-      // Portefeuille projeté — G2 (index 6)
       if (joined.includes('portefeuille projeté') || joined.includes('portefeuille projett')) portefeuilleProj = parseNum(r[6]);
-      // Disponible réel
       if (joined.includes('disponible réel') && !joined.includes('projeté')) disponible = parseNum(r[2]);
-      // Disponible projeté
       if (joined.includes('disponible projeté') || joined.includes('disponible projett')) disponibleProj = parseNum(r[6]);
-      // Tommy réel
       if (joined.includes('tommy réel') || joined.includes('tommy reel')) tommyReel = parseNum(r[2]);
-      // Tommy projeté
-      // Tommy projeté G3 = rows[2][6], Normand projeté G4 = rows[3][6]
       if (joined.includes('tommy projetté') || joined.includes('tommy projeté') || joined.includes('tommy projett')) tommyProj = parseNum(r[6]);
-      if ((joined.includes('normand projetté') || joined.includes('normand projeté') || joined.includes('normand projett')) && !joined.includes('réel')) normandProj = parseNum(r[6]);
-    }
-
-      // Advance Signal
+      if (joined.includes('normand réel') || joined.includes('normand reel')) normandReel = parseNum(r[2]);
+      if (joined.includes('normand projetté') || joined.includes('normand projeté') || joined.includes('normand projett')) normandProj = parseNum(r[6]);
       if (joined.includes('advance signal')) advanceSignal = parseNum(r[2]);
 
-      // Normand réel
-      if (joined.includes('normand réel') || joined.includes('normand reel')) normandReel = parseNum(r[2]);
-
-      // Compteurs J2:J5 (col index 9)
       for (let c = 0; c < r.length; c++) {
         const cell = (r[c] || '').toUpperCase().trim();
         if (cell === 'TOMMY') tommyCount = parseNum(r[c+1]) || tommyCount;
@@ -509,12 +495,11 @@ async function loadCDN() {
         if (cell === 'DÉTAIL' || cell === 'DETAIL') detailCount = parseNum(r[c+1]);
         if (cell === 'ONTARIO') ontarioCount = parseNum(r[c+1]) || ontarioCount;
       }
-      // Total inventaire — col 11 ou 12
       if (r[11] && parseNum(r[11]) > 50) inventaireTotal = parseNum(r[11]);
       if (r[12] && parseNum(r[12]) > 50) inventaireTotal = parseNum(r[12]);
     }
 
-    // Fallback positions fixes si pas trouvé par texte
+    // Fallback positions fixes
     if (portefeuilleReel === 0 && rows[1] && rows[1][2]) portefeuilleReel = parseNum(rows[1][2]);
     if (tommyProj === 0 && rows[2] && rows[2][6]) tommyProj = parseNum(rows[2][6]);
     if (normandProj === 0 && rows[3] && rows[3][6]) normandProj = parseNum(rows[3][6]);
