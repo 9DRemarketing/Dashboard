@@ -276,22 +276,22 @@
   }
   .regs-fait {
     display:inline-block; padding:2px 6px; border-radius:3px;
-    font-family:'DM Mono',monospace; font-size:10px; font-weight:600;
+    font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:600;
     background:rgba(5,150,105,0.08); border:1px solid rgba(5,150,105,0.3); color:var(--green);
   }
   .regs-afaire {
     display:inline-block; padding:2px 6px; border-radius:3px;
-    font-family:'DM Mono',monospace; font-size:10px; font-weight:600;
+    font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:600;
     background:rgba(220,38,38,0.08); border:1px solid rgba(220,38,38,0.3); color:var(--red);
   }
   .regs-averif {
     display:inline-block; padding:2px 6px; border-radius:3px;
-    font-family:'DM Mono',monospace; font-size:10px; font-weight:600;
+    font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:600;
     background:rgba(217,119,6,0.08); border:1px solid rgba(217,119,6,0.3); color:var(--yellow);
   }
   .regs-na {
     display:inline-block; padding:2px 6px; border-radius:3px;
-    font-family:'DM Mono',monospace; font-size:10px;
+    font-family:'JetBrains Mono',monospace; font-size:10px;
     color:var(--text3);
   }
   .vin-val {
@@ -491,6 +491,105 @@
 
   /* EMPTY STATE */
   .empty { padding: 30px; text-align: center; color: var(--text3); font-size: 12px; }
+
+  /* ───── STRUCTURE (ajouts) ───── */
+  .kpi-block.cols3 { grid-template-columns: repeat(3, 1fr); }
+  .kpi-ligne-label { min-width: 0; }
+  .kpi-ligne-val { white-space: nowrap; margin-left: 12px; }
+  .expand-panel { display: none; }
+  .expand-panel.open { display: table-row; }
+  .expand-grid { grid-template-columns: auto auto; justify-content: start; }
+  .expand-section { min-width: 280px; max-width: 340px; }
+  td.year-cell { overflow: visible; }
+  th.c-status, td.c-status { text-align: center; padding-left: 4px; padding-right: 4px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .status-dot { animation: none; }
+  }
+
+  /* ───── TABLETTE ───── */
+  @media (max-width: 1100px) {
+    .kpi-block, .kpi-block.cols3 { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ───── MOBILE : les rangées deviennent des cartes ───── */
+  @media (max-width: 768px) {
+    body { font-size: 14px; }
+    header { padding: 10px 14px; }
+    .header-meta { gap: 10px; }
+    .tabs { padding: 0 8px; overflow-x: auto; }
+    .tab { padding: 12px 14px; }
+    .content { padding: 14px; }
+    .search-bar { font-size: 16px; }
+    .copy-toast { left: 14px; right: 14px; bottom: 16px; text-align: center; }
+
+    /* KPI : on balaie de gauche à droite */
+    .kpi-block, .kpi-block.cols3 {
+      display: flex;
+      overflow-x: auto;
+      gap: 10px;
+      margin: 0 -14px 16px;
+      padding: 0 14px 6px;
+      scroll-snap-type: x mandatory;
+      scroll-padding-left: 14px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .kpi-tableau { flex: 0 0 82%; scroll-snap-align: start; }
+
+    /* Tableaux → cartes */
+    .table-wrap table, .table-wrap tbody { display: block; width: 100%; }
+    .table-wrap thead { display: none; }
+    tr.data-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px 10px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    tr.data-row td {
+      display: block;
+      padding: 0;
+      border: none;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+      word-break: break-word;
+      min-width: 0;
+      order: 3;
+    }
+    tr.data-row td[data-label]::before {
+      content: attr(data-label);
+      display: block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text3);
+      margin-bottom: 2px;
+    }
+    tr.data-row td.c-status { text-align: left; }
+    .m1 { grid-column: span 1; }
+    .m2 { grid-column: span 2; }
+    .m3 { grid-column: span 3; }
+    .m4 { grid-column: 1 / -1; }
+    td.m-head { order: 0; }
+    td.m-notes { order: 1; }
+    td.m-vin { order: 2; }
+    td.m-arrow { order: 9; text-align: center; }
+    td.m-arrow::before { content: 'Détails '; }
+    td.m-empty { display: none; }
+    .vehicle-name { font-size: 14px; }
+    .stock-num { font-size: 12px; }
+    .vin-val { font-size: 11px; }
+    .notes-highlight { max-width: none; white-space: normal; overflow: visible; }
+
+    /* Détails d'une rangée */
+    tr.expand-panel.open { display: block; }
+    .expand-panel td { display: block; }
+    .expand-grid { grid-template-columns: 1fr; }
+    .expand-section { min-width: 0; max-width: none; border-right: none; border-bottom: 1px solid var(--border); }
+    .expand-section:last-child { border-bottom: none; }
+  }
 </style>
 </head>
 <body>
@@ -505,8 +604,8 @@
 </header>
 
 <div class="tabs">
-  <div class="tab active" onclick="switchTab('cdn')">🇨🇦 Inventaire CDN</div>
-  <div class="tab" onclick="switchTab('us')">🇺🇸 Inventaire US</div>
+  <div class="tab active" data-tab="cdn" onclick="switchTab('cdn')">🇨🇦 Inventaire CDN</div>
+  <div class="tab" data-tab="us" onclick="switchTab('us')">🇺🇸 Inventaire US</div>
 </div>
 
 <div class="content">
@@ -520,7 +619,7 @@
 
   <!-- US TAB -->
   <div class="tab-panel" id="panel-us">
-    <div class="kpi-block" id="kpi-us" style="grid-template-columns:repeat(3,1fr)"></div>
+    <div class="kpi-block cols3" id="kpi-us"></div>
     <input class="search-bar" type="text" placeholder="Rechercher stock, véhicule, client..." oninput="filterTable('us-table', this.value)">
     <div id="us-table"><div class="loading"><div class="loading-spinner"></div>Chargement...</div></div>
   </div>
@@ -529,8 +628,9 @@
 
 <script>
 const SHEET_ID = '1jI5oWWijJ2lAP38YY240ZmIwX02t8CByYooDX3fMJrY';
-const GIDS = { cdn: '1663886144', us: '709858597', offers: '195781356' };
+const GIDS = { cdn: '1663886144', us: '709858597' };
 
+// ─── Données : téléchargement et lecture du CSV ─────────────────────
 function csvUrl(gid) {
   return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
 }
@@ -541,60 +641,208 @@ async function fetchCSV(gid) {
   return r.text();
 }
 
+// Gère les guillemets, les virgules et les retours à la ligne dans une cellule
 function parseCSV(text) {
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-  return lines.map(line => {
-    const cols = [];
-    let cur = '', inQ = false;
-    for (let i = 0; i < line.length; i++) {
-      if (line[i] === '"') { inQ = !inQ; }
-      else if (line[i] === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
-      else { cur += line[i]; }
-    }
-    cols.push(cur.trim());
-    return cols;
-  });
+  const clean = (s) => s.replace(/\s*[\r\n]+\s*/g, ' / ').trim();
+  const rows = [];
+  let row = [], cur = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQ) {
+      if (ch === '"') {
+        if (text[i + 1] === '"') { cur += '"'; i++; }
+        else inQ = false;
+      } else cur += ch;
+    } else if (ch === '"') {
+      inQ = true;
+    } else if (ch === ',') {
+      row.push(clean(cur)); cur = '';
+    } else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && text[i + 1] === '\n') i++;
+      row.push(clean(cur)); cur = '';
+      rows.push(row); row = [];
+    } else cur += ch;
+  }
+  row.push(clean(cur));
+  rows.push(row);
+  return rows.filter(r => r.some(c => c !== ''));
 }
 
+// "$1,234.50" → 1234.5   "(2,906.81)" → -2906.81   "-1,628.48" → -1628.48
 function parseNum(s) {
-  if (!s) return 0;
-  return parseFloat(s.replace(/[$,\s]/g, '')) || 0;
+  if (s === undefined || s === null) return 0;
+  const t = String(s).trim();
+  if (!t) return 0;
+  const neg = /^\(.*\)$/.test(t);
+  const n = parseFloat(t.replace(/[()$,\s]/g, ''));
+  if (isNaN(n)) return 0;
+  return neg ? -Math.abs(n) : n;
 }
 
+// Nom d'en-tête normalisé : "MÉC." → "MEC", "*LIEN" → "LIEN", "SELL PRICE USD" → "SELLPRICEUSD"
+const norm = (s) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[^A-Z0-9+]/g, '');
+const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const yr = (a) => /^\d{4}$/.test(a) ? a : /^\d{2}$/.test(a) ? '20' + a : a;
+
+// Associe chaque nom de colonne à sa position, d'après la ligne d'en-tête (STOCK, VÉHICULE, ...)
+function buildMap(headerRow) {
+  const m = {};
+  headerRow.forEach((h, i) => { const k = norm(h); if (k && !(k in m)) m[k] = i; });
+  return m;
+}
+const pick = (row, map, ...keys) => {
+  for (const k of keys) if (k in map) return row[map[k]] || '';
+  return '';
+};
+
+// Une ligne de section : rien dans la colonne A, un titre dans la colonne B, rien d'autre
+function isSectionRow(r) {
+  if (r[0] || !r[1] || r[1].startsWith('#')) return false;
+  for (let i = 2; i < r.length; i++) if (r[i] && !r[i].startsWith('#')) return false;
+  return true;
+}
+
+// Parcourt la feuille : chaque section a sa ligne d'en-tête, chaque véhicule commence par B + numéro
+function parseSheet(rows, mapper) {
+  const vehicles = [];
+  const sections = [];
+  let section = '', map = null;
+  for (const r of rows) {
+    if (norm(r[0]) === 'STOCK') { map = buildMap(r); continue; }
+    if (isSectionRow(r)) {
+      section = r[1].toUpperCase();
+      if (!sections.includes(section)) sections.push(section);
+      continue;
+    }
+    if (map && /^B\d+/i.test(r[0]) && r[1] && !r[1].startsWith('#')) vehicles.push(mapper(r, map, section));
+  }
+  return { vehicles, sections };
+}
+
+function mapCDN(r, m, section) {
+  const g = (...k) => pick(r, m, ...k);
+  return {
+    section,
+    stock: g('STOCK'), vehicule: g('VEHICULE'), vin: g('VIN'), annee: yr(g('ANNEE')),
+    couleur: g('COULEUR'), km: g('KM'), location: g('LOCATION', 'TRANSPORT'), notes: g('NOTES'),
+    rappel: g('RAPPEL'), mec: g('MEC'), body: g('BODY'), esthet: g('ESTHET'),
+    carfax: g('CARFAX'), lien: g('LIEN'), regs: g('REGS'), statut: g('STATUT'),
+    fournisseur: g('FOURNISSEUR'), client: g('CLIENT'), acheteur: g('ACHETEUR'),
+    costCad: parseNum(g('COSTCAD')), profitCad: parseNum(g('PROFITCAD'))
+  };
+}
+
+function mapUS(r, m, section) {
+  const g = (...k) => pick(r, m, ...k);
+  return {
+    section,
+    stock: g('STOCK'), vehicule: g('VEHICULE'), vin: g('VIN'), annee: yr(g('ANNEE')),
+    couleur: g('COULEUR'), km: g('KM'), notes: g('NOTES'),
+    arrival: g('ARRIVAL'), submit: g('SUBMIT'), release: g('RELEASE'), sold: g('SOLD'),
+    client: g('CLIENT'), acheteur: g('ACHETEUR'), statut: g('STATUT'), mmr: parseNum(g('MMR')),
+    costUsd: parseNum(g('COSTUSD')), sellUsd: parseNum(g('SELLPRICEUSD')),
+    costCad: parseNum(g('COSTCAD')), sellCad: parseNum(g('SELLPRICECAD')),
+    profitCad: parseNum(g('PROFITCAD')),
+    regs: g('REGS'), cfLien: g('CF+LIEN'), f7501: g('7501')
+  };
+}
+
+// ─── Affichage : utilitaires ────────────────────────────────────────
 function fmtCAD(n) {
   if (isNaN(n) || n === 0) return '—';
-  return '$' + Math.round(n).toLocaleString('fr-CA');
+  return (n < 0 ? '-' : '') + '$' + Math.round(Math.abs(n)).toLocaleString('fr-CA');
 }
 
 function fmtUSD(n) {
   if (isNaN(n) || n === 0) return '—';
-  return 'US$' + Math.round(n).toLocaleString('en-US');
+  return (n < 0 ? '-' : '') + 'US$' + Math.round(Math.abs(n)).toLocaleString('en-US');
+}
+
+function kmFmt(k) {
+  if (!k) return '—';
+  const n = Number(String(k).replace(/[\s,]/g, ''));
+  return isNaN(n) ? esc(k) : n.toLocaleString('fr-CA') + ' km';
 }
 
 function statusBadge(s) {
   if (!s || s === '—') return '';
   const map = { HL: 'badge-hl', ST: 'badge-st', PRB: 'badge-prb', ACC: 'badge-acc', REL: 'badge-rel' };
   const cls = map[s.toUpperCase()] || 'badge-default';
-  return `<span class="badge ${cls}">${s}</span>`;
+  return `<span class="badge ${cls}">${esc(s)}</span>`;
 }
 
-function profitCell(n) {
-  if (n === 0 || isNaN(n)) return `<span class="profit-zero">—</span>`;
-  if (n > 0) return `<span class="profit-pos">+${fmtCAD(n)}</span>`;
-  return `<span class="profit-neg">${fmtCAD(n)}</span>`;
+// FAIT / À FAIRE / À VÉRIF / N/A / lien — même affichage pour REGS, Carfax, Lien, 7501
+function statusCell(val) {
+  const raw = (val || '').trim();
+  const u = raw.toUpperCase();
+  if (!raw || raw === '—') return '<span class="regs-afaire">—</span>';
+  if (u === 'FAIT') return '<span class="regs-fait">FAIT</span>';
+  if (u.includes('À FAIRE') || u.includes('A FAIRE')) return '<span class="regs-afaire">À FAIRE</span>';
+  if (u.includes('VÉRIF') || u.includes('VERIF') || u === 'X' || u.includes('SCAN')) return `<span class="regs-averif">${esc(raw)}</span>`;
+  if (u === 'N/A') return '<span class="regs-na">N/A</span>';
+  if (/^https?:/i.test(raw)) return `<a href="${esc(raw)}" target="_blank" rel="noopener" style="color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:10px;text-decoration:none">↗ Lien</a>`;
+  return `<span class="regs-na">${esc(raw)}</span>`;
 }
 
+function profitInfo(n) {
+  return {
+    color: n > 0 ? 'var(--green)' : n < 0 ? 'var(--red)' : 'var(--text3)',
+    text: n !== 0 ? (n > 0 ? '+' : '') + fmtCAD(n) : '—'
+  };
+}
+
+const vinHtml = (vin) => vin ? `<span class="vin-val copyable" data-copy="${esc(vin)}" title="Copier VIN">${esc(vin)}</span>` : '—';
+const stockHtml = (s) => `<span class="stock-num copyable" data-copy="${esc(s)}" title="Copier">${esc(s)}</span>`;
+const dateCell = (d) => d ? `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)" title="${esc(d)}">${esc(d)}</span>` : '<span style="color:var(--text3)">—</span>';
+
+const kpiLine = (label, value, cls = '', rowCls = '') =>
+  `<div class="kpi-ligne ${rowCls}"><span class="kpi-ligne-label">${label}</span><span class="kpi-ligne-val ${cls}">${value}</span></div>`;
+const signClass = (n) => n < 0 ? 'red' : 'green';
+const TAG_TOMMY = '<span class="tag-tommy">TOMMY</span>';
+const TAG_NORMAND = '<span class="tag-normand">NORMAND</span>';
+
+const SECTION_COLORS = {
+  'NOUVEAUX ARRIVAGES': '#e8ff47', 'EN PRÉPARATION': '#47c8ff', 'INVENTAIRE ACTIF': '#47ff9a',
+  'LOAD PRECISION': '#ff6b47', 'IN TRANSIT PRECISION': '#ffcc47', 'IN TRANSIT SPEEDO': '#c847ff', 'AUTRES': '#8888aa',
+  'SPEEDO': '#fbbf24', 'DIV': '#f472b6', 'PRECISION IMPORTERS': '#38bdf8', 'PDR SOLUTIONS': '#c084fc', 'STRATTON': '#34d399'
+};
+const FALLBACK_COLORS = ['#818cf8', '#f87171', '#fbbf24', '#34d399', '#38bdf8', '#f472b6'];
+const sectionColor = (name, i) => SECTION_COLORS[name] || FALLBACK_COLORS[i % FALLBACK_COLORS.length];
+
+function groupBySection(vehicles) {
+  const groups = new Map();
+  for (const v of vehicles) {
+    const k = v.section || 'AUTRE';
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(v);
+  }
+  return groups;
+}
+
+const th = (w, label, cls = '') => `<th style="width:${w}px"${cls ? ` class="${cls}"` : ''}>${label}</th>`;
+
+function sectionBlock(name, i, count, theadHtml, rowsHtml) {
+  return `
+    <div class="table-wrap">
+      <div class="table-section-label">
+        <span class="dot" style="background:${sectionColor(name, i)}"></span>
+        ${esc(name)} <span style="color:var(--text3);margin-left:8px">${count} unité${count > 1 ? 's' : ''}</span>
+      </div>
+      <table>
+        <thead><tr>${theadHtml}</tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    </div>`;
+}
+
+// ─── Interactions ───────────────────────────────────────────────────
 function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach((t,i) => {
-    const tabs = ['cdn','us'];
-    t.classList.toggle('active', tabs[i] === tab);
-  });
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + tab).classList.add('active');
 }
 
-function copyText(e, text) {
-  e.stopPropagation();
+function copyText(text) {
   if (!text || text === '—') return;
   navigator.clipboard.writeText(text).then(() => {
     const t = document.createElement('div');
@@ -605,676 +853,305 @@ function copyText(e, text) {
   });
 }
 
-function toggleExpand(rowId) {
-  const panel = document.getElementById(rowId);
-  if (!panel) return;
-  const isOpen = panel.style.display !== 'none';
-  panel.style.display = isOpen ? 'none' : 'table-row';
+function toggleExpand(id) {
+  const panel = document.getElementById(id);
+  if (panel) panel.classList.toggle('open');
 }
 
 function filterTable(containerId, query) {
-  const q = query.toLowerCase();
-  const container = document.getElementById(containerId);
-  const rows = container.querySelectorAll('tr.data-row');
-  rows.forEach(row => {
-    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  const q = query.trim().toLowerCase();
+  document.querySelectorAll('#' + containerId + ' tr.data-row').forEach(row => {
+    const show = !q || row.textContent.toLowerCase().includes(q);
+    row.style.display = show ? '' : 'none';
+    if (!show) {
+      const panel = document.getElementById(row.dataset.target);
+      if (panel) panel.classList.remove('open');
+    }
   });
 }
 
+// Un seul écouteur : copie (stock, VIN) et ouverture des détails d'une rangée
+document.addEventListener('click', (e) => {
+  if (e.target.closest('a')) return;
+  const c = e.target.closest('[data-copy]');
+  if (c) { copyText(c.dataset.copy); return; }
+  const r = e.target.closest('tr.expandable-row');
+  if (r) toggleExpand(r.dataset.target);
+});
+
+let uid = 0;
+
 // ─── CDN ────────────────────────────────────────────────────────────
+// Bloc du haut de la feuille : les libellés sont repérés par leur texte, pas par leur position
+function parseCdnSummary(rows) {
+  const top = rows.slice(0, 15);
+  const S = { total: {}, tommy: {}, normand: {}, counts: { tommy: 0, normand: 0, detail: 0, ontario: 0 }, funds: null };
+  let alloc = null;
+
+  for (const r of top) {
+    const l = norm(r[1]);
+    if (l.startsWith('PORTEFEUILLEALLOUE')) { S.total.alloue = parseNum(r[2]); alloc = r; }
+    else if (l.startsWith('PORTEFEUILLEREEL')) S.total.reel = parseNum(r[2]);
+    else if (l.startsWith('PORTEFEUILLEPROJ')) S.total.proj = parseNum(r[2]);
+    else if (l.startsWith('DISPONIBLEREEL')) S.total.dispo = parseNum(r[2]);
+    else if (l.startsWith('DISPONIBLEPROJ')) S.total.dispoProj = parseNum(r[2]);
+    else if (l.startsWith('FONDS') || l.startsWith('ADVANCE')) S.funds = { label: r[1], value: parseNum(r[2]) };
+  }
+
+  // Portefeuille de Tommy et de Normand : sur la ligne « alloué », le nom est suivi de son montant
+  if (alloc) {
+    for (const [key, name] of [['tommy', 'TOMMY'], ['normand', 'NORMAND']]) {
+      const li = alloc.findIndex(c => norm(c) === name);
+      if (li < 0) continue;
+      let vi = -1;
+      for (let i = li + 1; i < alloc.length; i++) if (parseNum(alloc[i]) > 0) { vi = i; break; }
+      if (vi < 0) continue;
+      S[key].alloue = parseNum(alloc[vi]);
+      for (const r of top) {
+        if (r === alloc) continue;
+        const l = norm(r[li]);
+        const v = parseNum(r[vi]);
+        if (l === 'REEL') S[key].reel = v;
+        else if (l.includes('DISPO') && l.includes('PROJ')) S[key].dispoProj = v;
+        else if (l.includes('DISPO')) S[key].dispo = v;
+        else if (l.includes('PROJ')) S[key].proj = v;
+      }
+    }
+  }
+
+  // Nombre de véhicules : Tommy / Normand / Détail / Ontario, suivis de leur nombre
+  const countKeys = { TOMMY: 'tommy', NORMAND: 'normand', DETAIL: 'detail', ONTARIO: 'ontario' };
+  for (const r of top) {
+    if (r === alloc) continue;
+    r.forEach((c, i) => {
+      const k = countKeys[norm(c)];
+      if (k && /^\d+$/.test((r[i + 1] || '').trim())) S.counts[k] = parseInt(r[i + 1], 10);
+    });
+  }
+  return S;
+}
+
+function renderCdnKpis(S) {
+  const t = S.total, tm = S.tommy, nm = S.normand, c = S.counts;
+  const inventaireTotal = c.tommy + c.normand + c.detail + c.ontario;
+  document.getElementById('kpi-cdn').innerHTML = `
+    <div class="kpi-tableau highlight">
+      <div class="kpi-tableau-header">Portefeuille</div>
+      ${kpiLine('Alloué', fmtCAD(t.alloue), 'accent')}
+      ${kpiLine('Projeté', fmtCAD(t.proj), 'blue')}
+      ${kpiLine('Réel', fmtCAD(t.reel))}
+      ${kpiLine('Disponible réel', fmtCAD(t.dispo), signClass(t.dispo))}
+      ${kpiLine('Disponible projeté', fmtCAD(t.dispoProj), signClass(t.dispoProj))}
+      ${S.funds ? kpiLine(esc(S.funds.label), fmtCAD(S.funds.value), 'yellow') : ''}
+    </div>
+
+    <div class="kpi-tableau tommy">
+      <div class="kpi-tableau-header">${TAG_TOMMY} &nbsp;Portefeuille</div>
+      ${kpiLine('Alloué', fmtCAD(tm.alloue), 'blue')}
+      ${kpiLine('Projeté', fmtCAD(tm.proj), 'blue')}
+      ${kpiLine('Réel', fmtCAD(tm.reel))}
+      ${kpiLine('Dispo réel', fmtCAD(tm.dispo), signClass(tm.dispo))}
+      ${kpiLine('Dispo projeté', fmtCAD(tm.dispoProj), signClass(tm.dispoProj))}
+    </div>
+
+    <div class="kpi-tableau normand">
+      <div class="kpi-tableau-header">${TAG_NORMAND} &nbsp;Portefeuille</div>
+      ${kpiLine('Alloué', fmtCAD(nm.alloue), 'purple')}
+      ${kpiLine('Projeté', fmtCAD(nm.proj), 'purple')}
+      ${kpiLine('Réel', fmtCAD(nm.reel))}
+      ${kpiLine('Dispo réel', fmtCAD(nm.dispo), signClass(nm.dispo))}
+      ${kpiLine('Dispo projeté', fmtCAD(nm.dispoProj), signClass(nm.dispoProj))}
+    </div>
+
+    <div class="kpi-tableau inventaire">
+      <div class="kpi-tableau-header">Inventaire</div>
+      ${kpiLine('Total', inventaireTotal, 'green big', 'total-row')}
+      ${kpiLine(TAG_TOMMY, c.tommy, 'blue')}
+      ${kpiLine(TAG_NORMAND, c.normand, 'purple')}
+      ${kpiLine('Détail', c.detail)}
+      ${kpiLine('Ontario', c.ontario, 'yellow')}
+    </div>`;
+}
+
+function cdnRow(v) {
+  const id = 'r' + (++uid);
+  const p = profitInfo(v.profitCad);
+  const notes = v.notes ? `<span class="notes-highlight" title="${esc(v.notes)}">${esc(v.notes)}</span>` : '';
+  return `
+    <tr class="data-row expandable-row" data-target="${id}">
+      <td class="m-head m1">${stockHtml(v.stock)}</td>
+      <td class="m-head m3"><span class="vehicle-name">${esc(v.vehicule)}</span></td>
+      <td class="m-vin m4" data-label="VIN">${vinHtml(v.vin)}</td>
+      <td class="year-cell cost-val m1" data-label="Année">${esc(v.annee) || '—'}</td>
+      <td class="cost-val m1" data-label="Couleur">${esc(v.couleur) || '—'}</td>
+      <td class="km-cell m2" data-label="KM">${kmFmt(v.km)}</td>
+      <td class="cost-val m2" data-label="Location">${esc(v.location) || '—'}</td>
+      <td class="m-notes m4${v.notes ? '' : ' m-empty'}" data-label="Notes">${notes}</td>
+      <td class="c-status m1" data-label="Carfax">${statusCell(v.carfax)}</td>
+      <td class="c-status m1" data-label="Lien">${statusCell(v.lien)}</td>
+      <td class="c-status m1" data-label="REGS">${statusCell(v.regs)}</td>
+      <td class="cost-val m3" data-label="Fournisseur" title="${esc(v.fournisseur)}">${esc(v.fournisseur) || '—'}</td>
+      <td class="cost-val m2" data-label="Client" title="${esc(v.client)}">${esc(v.client) || '—'}</td>
+      <td class="cost-val m2" data-label="Acheteur" title="${esc(v.acheteur)}">${esc(v.acheteur) || '—'}</td>
+      <td class="m-arrow" style="color:var(--text3);font-size:10px;text-align:center">▾</td>
+    </tr>
+    <tr class="expand-panel" id="${id}">
+      <td colspan="15">
+        <div class="expand-grid">
+          <div class="expand-section">
+            <div class="expand-section-title">🔧 RECON</div>
+            <div class="expand-row"><span>Mécanique</span><span>${esc(v.mec) || '—'}</span></div>
+            <div class="expand-row"><span>Body</span><span>${esc(v.body) || '—'}</span></div>
+            <div class="expand-row"><span>Esthétique</span><span>${esc(v.esthet) || '—'}</span></div>
+            <div class="expand-row"><span>Rappel</span><span>${esc(v.rappel) || '—'}</span></div>
+          </div>
+          <div class="expand-section">
+            <div class="expand-section-title">💰 TRANSACTION</div>
+            <div class="expand-row"><span>Statut</span><span>${statusBadge(v.statut) || '—'}</span></div>
+            <div class="expand-row"><span>Fournisseur</span><span>${esc(v.fournisseur) || '—'}</span></div>
+            <div class="expand-row"><span>Client</span><span>${esc(v.client) || '—'}</span></div>
+            <div class="expand-row"><span>Acheteur</span><span>${esc(v.acheteur) || '—'}</span></div>
+            <div class="expand-row"><span>Cost CAD</span><span style="color:var(--text2)">${v.costCad ? fmtCAD(v.costCad) : '—'}</span></div>
+            <div class="expand-row"><span>Profit CAD</span><span style="color:${p.color};font-weight:600">${p.text}</span></div>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+}
+
 async function loadCDN() {
   try {
-    const text = await fetchCSV(GIDS.cdn);
-    const rows = parseCSV(text);
+    const rows = parseCSV(await fetchCSV(GIDS.cdn));
+    renderCdnKpis(parseCdnSummary(rows));
 
-    // Parse portfolio summary — positions fixes dans le Google Sheet
-    // Row 1 (index 0) = ligne 1 du CSV = ligne 1 du sheet
-    // C2 = col index 2, row index 1
-    let portefeuilleAlloue = 0, portefeuilleReel = 0, portefeuilleProj = 0, disponible = 0, disponibleProj = 0;
-    let tommyReel = 0, tommyProj = 0;
-    let normandReel = 0, normandProj = 0;
-    let advanceSignal = 0;
-    let tommyCount = 0, normandCount = 0, detailCount = 0, ontarioCount = 0;
-    let inventaireTotal = 0;
+    const { vehicles } = parseSheet(rows, mapCDN);
+    const thead =
+      th(65, 'Stock') + th(160, 'Véhicule') + th(140, 'VIN') + th(48, 'Année') + th(55, 'Couleur') +
+      th(80, 'KM') + th(85, 'Location') + th(160, 'Notes') +
+      th(60, 'Carfax', 'c-status') + th(60, 'Lien', 'c-status') + th(60, 'REGS', 'c-status') +
+      th(120, 'Fournisseur') + th(115, 'Client') + th(85, 'Acheteur') + th(18, '');
 
-    // Lire toutes les 10 premières lignes pour trouver les valeurs
-    for (let i = 0; i < 10; i++) {
-      const r = rows[i] || [];
-      const joined = r.join('|').toLowerCase();
-
-      if (joined.includes('portfeuille alloué') || joined.includes('portefeuille alloué')) portefeuilleAlloue = parseNum(r[2]);
-      if (joined.includes('portefeuille réel') && !joined.includes('tommy') && !joined.includes('normand')) portefeuilleReel = parseNum(r[2]);
-      if (joined.includes('portefeuille projeté') || joined.includes('portefeuille projett')) portefeuilleProj = parseNum(r[6]);
-      if (joined.includes('disponible réel') && !joined.includes('projeté')) disponible = parseNum(r[2]);
-      if (joined.includes('disponible projeté') || joined.includes('disponible projett')) disponibleProj = parseNum(r[6]);
-      if (joined.includes('tommy réel') || joined.includes('tommy reel')) tommyReel = parseNum(r[2]);
-      if (joined.includes('tommy projetté') || joined.includes('tommy projeté') || joined.includes('tommy projett')) tommyProj = parseNum(r[6]);
-      if (joined.includes('normand réel') || joined.includes('normand reel')) normandReel = parseNum(r[2]);
-      if (joined.includes('normand projetté') || joined.includes('normand projeté') || joined.includes('normand projett')) normandProj = parseNum(r[6]);
-      if (joined.includes('advance signal')) advanceSignal = parseNum(r[2]);
-
-      for (let c = 0; c < r.length; c++) {
-        const cell = (r[c] || '').toUpperCase().trim();
-        if (cell === 'TOMMY') tommyCount = parseNum(r[c+1]) || tommyCount;
-        if (cell === 'NORMAND') normandCount = parseNum(r[c+1]) || normandCount;
-        if (cell === 'DÉTAIL' || cell === 'DETAIL') detailCount = parseNum(r[c+1]);
-        if (cell === 'ONTARIO') ontarioCount = parseNum(r[c+1]) || ontarioCount;
-      }
-      if (r[11] && parseNum(r[11]) > 50) inventaireTotal = parseNum(r[11]);
-      if (r[12] && parseNum(r[12]) > 50) inventaireTotal = parseNum(r[12]);
+    let html = '', i = 0;
+    for (const [name, list] of groupBySection(vehicles)) {
+      html += sectionBlock(name, i++, list.length, thead, list.map(cdnRow).join(''));
     }
-
-    // Fallback positions fixes
-    if (portefeuilleReel === 0 && rows[1] && rows[1][2]) portefeuilleReel = parseNum(rows[1][2]);
-    if (tommyProj === 0 && rows[2] && rows[2][6]) tommyProj = parseNum(rows[2][6]);
-    if (normandProj === 0 && rows[3] && rows[3][6]) normandProj = parseNum(rows[3][6]);
-
-    // Find all data rows (stock numbers starting with B)
-    const vehicles = [];
-    let currentSection = '';
-    const sectionColors = {
-      'NOUVEAUX ARRIVAGES': '#e8ff47',
-      'EN PRÉPARATION': '#47c8ff',
-      'PRÊT': '#47ff9a',
-      'IN TRANSIT BMA': '#ff6b47',
-      'WHOLESALE*ENCAN LOCALE': '#ffcc47',
-      'WS ONTARIO': '#c847ff',
-    };
-
-    for (const row of rows) {
-      if (!row[0] && row[1] && !row[1].startsWith('#') && row[2] !== 'VIN') {
-        const label = row[1].toUpperCase().replace(/LOAD SPEEDO.*/, 'LOAD SPEEDO');
-        if (!label.match(/^\$/) && !label.match(/^PORTEFEUILLE/) && !label.match(/^TOMMY/) && !label.match(/^NORMAND/) && !label.match(/^ADVANCE/) && !label.match(/^AJOUT/) && !label.match(/^DISPONIBLE/) && !label.match(/^NOUVEAUX ARRIVAGES/) && !label.match(/^EN PRÉPARATION/) && !label.match(/^PRÊT/) && !label.match(/^IN TRANSIT/) && !label.match(/^WHOLESALE/) && !label.match(/^WS ONTARIO/)) {
-          // might be section
-        }
-        // Detect section labels
-        const secLabels = ['NOUVEAUX ARRIVAGES','EN PRÉPARATION','PRÊT','IN TRANSIT BMA','WHOLESALE','WS ONTARIO'];
-        for (const sl of secLabels) {
-          if (row[1] && row[1].toUpperCase().includes(sl.split('*')[0])) {
-            currentSection = sl; break;
-          }
-        }
-        if (row[1] && row[1].toUpperCase().startsWith('LOAD SPEEDO')) {
-          currentSection = row[1].toUpperCase();
-        }
-      }
-      if (row[0] && row[0].startsWith('B') && row[1] && !row[1].startsWith('#')) {
-        vehicles.push({
-          stock: row[0], vehicule: row[1], vin: row[2], 
-          annee: (row[3] && row[3].match(/^\d{4}$/)) ? row[3] : (row[3] && row[3].match(/^\d{2}$/)) ? '20' + row[3] : row[3],
-          couleur: row[4], km: row[5], location: row[6], notes: row[7],
-          rappel: row[8] || '', mec: row[9] || '', body: row[10] || '',
-          esthet: row[11] || '', cfLien: row[12] || '', regs: row[13] || '',
-          fournisseur: row[14] || '', client: row[15] || '', acheteur: row[16] || '',
-          costCad: parseNum(row[17]), profitCad: parseNum(row[18]),
-          statut: row[19] || '', section: currentSection
-        });
-      }
-    }
-
-    // KPIs — 4 tableaux côte à côte
-    const kpiEl = document.getElementById('kpi-cdn');
-
-    const dispReelClass = disponible >= 0 ? 'green' : 'red';
-    const avanceClass = 'yellow';
-
-    kpiEl.innerHTML = `
-      <!-- TABLEAU 1 : PORTEFEUILLE -->
-      <div class="kpi-tableau highlight">
-        <div class="kpi-tableau-header">Portefeuille</div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label">Alloué</span>
-          <span class="kpi-ligne-val accent">${fmtCAD(portefeuilleAlloue)}</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label">Projeté</span>
-          <span class="kpi-ligne-val blue">${fmtCAD(portefeuilleProj)}</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label">Réel</span>
-          <span class="kpi-ligne-val">${fmtCAD(portefeuilleReel)}</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label">Disponible Réel</span>
-          <span class="kpi-ligne-val ${dispReelClass}">${fmtCAD(disponible)}</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label">Advance Signal</span>
-          <span class="kpi-ligne-val yellow">${fmtCAD(advanceSignal)}</span>
-        </div>
-      </div>
-
-      <!-- TABLEAU 2 : TOMMY -->
-      <div class="kpi-tableau tommy">
-        <div class="kpi-tableau-header"><span class="tag-tommy">TOMMY</span> &nbsp;Portefeuille</div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label">Alloué</span>
-          <span class="kpi-ligne-val blue">$1 600 000</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label">Projeté</span>
-          <span class="kpi-ligne-val blue">${fmtCAD(tommyProj)}</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label">Réel</span>
-          <span class="kpi-ligne-val">${fmtCAD(tommyReel)}</span>
-        </div>
-      </div>
-
-      <!-- TABLEAU 3 : NORMAND -->
-      <div class="kpi-tableau normand">
-        <div class="kpi-tableau-header"><span class="tag-normand">NORMAND</span> &nbsp;Portefeuille</div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label">Alloué</span>
-          <span class="kpi-ligne-val purple">$750 000</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label">Projeté</span>
-          <span class="kpi-ligne-val purple">${fmtCAD(normandProj)}</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label">Réel</span>
-          <span class="kpi-ligne-val">${fmtCAD(normandReel)}</span>
-        </div>
-      </div>
-
-      <!-- TABLEAU 4 : INVENTAIRE -->
-      <div class="kpi-tableau inventaire">
-        <div class="kpi-tableau-header">Inventaire</div>
-        <div class="kpi-ligne total-row">
-          <span class="kpi-ligne-label">Total</span>
-          <span class="kpi-ligne-val green big">${inventaireTotal || (tommyCount + normandCount + detailCount + ontarioCount)}</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label"><span class="tag-tommy">TOMMY</span></span>
-          <span class="kpi-ligne-val blue">${tommyCount}</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label"><span class="tag-normand">NORMAND</span></span>
-          <span class="kpi-ligne-val purple">${normandCount}</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label">Détail</span>
-          <span class="kpi-ligne-val">${detailCount}</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label">Ontario</span>
-          <span class="kpi-ligne-val yellow">${ontarioCount}</span>
-        </div>
-      </div>
-    `;
-
-
-    // Group by section
-    const sections = {};
-    for (const v of vehicles) {
-      const sec = v.section || 'AUTRE';
-      if (!sections[sec]) sections[sec] = [];
-      sections[sec].push(v);
-    }
-
-    let html = '';
-    const secOrder = ['NOUVEAUX ARRIVAGES','EN PRÉPARATION','PRÊT','IN TRANSIT BMA','WHOLESALE*ENCAN LOCALE','WS ONTARIO'];
-    const allSecs = [...secOrder, ...Object.keys(sections).filter(s => !secOrder.includes(s))];
-
-    for (const sec of allSecs) {
-      if (!sections[sec] || sections[sec].length === 0) continue;
-      const dotColor = sectionColors[sec] || '#8888aa';
-      html += `
-        <div class="table-wrap">
-          <div class="table-section-label">
-            <span class="dot" style="background:${dotColor}"></span>
-            ${sec} <span style="color:var(--text3);margin-left:8px">${sections[sec].length} unité${sections[sec].length > 1 ? 's' : ''}</span>
-          </div>
-          <table style="table-layout:fixed;width:100%">
-            <thead><tr>
-              <th style="width:65px">Stock</th>
-              <th style="width:165px">Véhicule</th>
-              <th style="width:140px">VIN</th>
-              <th style="width:42px">Année</th>
-              <th style="width:55px">Couleur</th>
-              <th style="width:80px">KM</th>
-              <th style="width:85px">Location</th>
-              <th style="width:175px">Notes</th>
-              <th style="width:55px">CF+Lien</th>
-              <th style="width:55px">REGS</th>
-              <th style="width:120px">Fournisseur</th>
-              <th style="width:115px">Client</th>
-              <th style="width:85px">Acheteur</th>
-              <th style="width:18px"></th>
-            </tr></thead>
-            <tbody>
-      `;
-      for (const v of sections[sec]) {
-        const rowId = 'row-' + v.stock.replace(/\W/g,'');
-        const profitColor = v.profitCad > 0 ? 'var(--green)' : v.profitCad < 0 ? 'var(--red)' : 'var(--text3)';
-        const profitFmt = v.profitCad !== 0 ? (v.profitCad > 0 ? '+' : '') + fmtCAD(v.profitCad) : '—';
-        const notesCls = v.notes && v.notes.trim() ? 'notes-highlight' : 'notes-empty';
-        html += `
-        <tr class="data-row expandable-row" onclick="toggleExpand('${rowId}')">
-          <td><span class="stock-num copyable" onclick="copyText(event,'${v.stock}')" title="Copier">${v.stock}</span></td>
-          <td><span class="vehicle-name">${v.vehicule}</span></td>
-          <td><span class="vin-val copyable" onclick="copyText(event,'${v.vin||''}')" title="Copier VIN">${v.vin || '—'}</span></td>
-          <td class="cost-val" style="white-space:nowrap;overflow:visible">${v.annee || '—'}</td>
-          <td class="cost-val">${v.couleur || '—'}</td>
-          <td class="km-cell">${v.km ? Number(v.km).toLocaleString('fr-CA') + ' km' : '—'}</td>
-          <td class="cost-val">${v.location || '—'}</td>
-          <td><span class="${notesCls}" title="${v.notes}">${v.notes || ''}</span></td>
-          <td style="text-align:center">${(()=>{
-            const cf = (v.cfLien||'').trim().toUpperCase();
-            if(!cf || cf==='—') return '<span class="regs-afaire">N/A</span>';
-            if(cf==='FAIT') return '<span class="regs-fait">FAIT</span>';
-            if(cf.includes('À FAIRE')) return '<span class="regs-afaire">À FAIRE</span>';
-            if(cf.includes('À VÉRIF') || cf.includes('A VERIF')) return '<span class="regs-averif">À VÉRIF</span>';
-            if(cf==='N/A') return '<span class="regs-na">N/A</span>';
-            // Si c'est une URL, afficher lien
-            if(cf.startsWith('HTTP')) return `<a href="${v.cfLien}" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent2);font-family:'DM Mono',monospace;font-size:10px;text-decoration:none">↗ Lien</a>`;
-            return `<span class="regs-na">${v.cfLien}</span>`;
-          })()}</td>
-          <td style="text-align:center">${(()=>{
-            const r = (v.regs||'').trim().toUpperCase();
-            if(!r || r==='—' || r==='') return '<span class="regs-afaire">—</span>';
-            if(r==='FAIT') return '<span class="regs-fait">FAIT</span>';
-            if(r.includes('À FAIRE')) return '<span class="regs-afaire">À FAIRE</span>';
-            if(r.includes('À VÉRIF') || r.includes('A VERIF') || r==='X' || r.includes('SCAN')) return `<span class="regs-averif">${v.regs}</span>`;
-            if(r==='N/A') return '<span class="regs-na">N/A</span>';
-            return `<span class="regs-na">${v.regs}</span>`;
-          })()}</td>
-          <td class="cost-val" title="${v.fournisseur}">${v.fournisseur || '—'}</td>
-          <td class="cost-val" title="${v.client}">${v.client || '—'}</td>
-          <td class="cost-val" title="${v.acheteur}">${v.acheteur || '—'}</td>
-          <td style="color:var(--text3);font-size:10px;text-align:center">▾</td>
-        </tr>
-        <tr class="expand-panel" id="${rowId}" style="display:none">
-          <td colspan="14">
-            <div class="expand-grid" style="grid-template-columns:auto auto;justify-content:start;gap:0">
-              <div class="expand-section" style="min-width:280px;max-width:320px">
-                <div class="expand-section-title">🔧 RECON</div>
-                <div class="expand-row"><span>Mécanique</span><span>${v.mec || '—'}</span></div>
-                <div class="expand-row"><span>Body</span><span>${v.body || '—'}</span></div>
-                <div class="expand-row"><span>Esthétique</span><span>${v.esthet || '—'}</span></div>
-                <div class="expand-row"><span>Rappel</span><span>${v.rappel || '—'}</span></div>
-              </div>
-              <div class="expand-section" style="min-width:280px;max-width:340px">
-                <div class="expand-section-title">💰 TRANSACTION</div>
-                <div class="expand-row"><span>Fournisseur</span><span>${v.fournisseur || '—'}</span></div>
-                <div class="expand-row"><span>Client</span><span>${v.client || '—'}</span></div>
-                <div class="expand-row"><span>Acheteur</span><span>${v.acheteur || '—'}</span></div>
-                <div class="expand-row"><span>Cost CAD</span><span style="color:var(--text2)">${v.costCad ? fmtCAD(v.costCad) : '—'}</span></div>
-                <div class="expand-row"><span>Profit CAD</span><span style="color:${profitColor};font-weight:600">${profitFmt}</span></div>
-              </div>
-            </div>
-          </td>
-        </tr>`;
-      }
-      html += `</tbody></table></div>`;
-    }
-
     document.getElementById('cdn-table').innerHTML = html || '<div class="empty">Aucune donnée</div>';
-  } catch(e) {
+  } catch (e) {
     document.getElementById('kpi-cdn').innerHTML = '';
-    document.getElementById('cdn-table').innerHTML = `<div class="error">❌ Erreur: ${e.message}<br><small>${e.stack}</small></div>`;
+    document.getElementById('cdn-table').innerHTML = `<div class="error">❌ Erreur: ${esc(e.message)}<br><small>${esc(e.stack)}</small></div>`;
   }
 }
 
 // ─── US ─────────────────────────────────────────────────────────────
-async function loadUS() {
-  try {
-    const text = await fetchCSV(GIDS.us);
-    const rows = parseCSV(text);
+const isStratton = (v) => v.section.includes('STRATTON');
+const isTommy = (v) => { const a = (v.acheteur || '').toUpperCase().trim(); return !a || a.includes('DANY') || a.includes('BRUNONE'); };
+const isNormand = (v) => (v.acheteur || '').toUpperCase().includes('NORMAND');
 
-    const vehicles = [];
-    let currentSection = '';
+function renderUsKpis(vehicles, sections) {
+  const base = vehicles.filter(v => !isStratton(v));
+  const sum = (list) => list.reduce((s, v) => s + v.costCad, 0);
+  const vendus = base.filter(v => v.client);
+  const nonVendus = base.filter(v => !v.client);
 
-    for (const row of rows) {
-      if (!row[0] && row[1] && !row[1].startsWith('#') && row[1] !== 'VÉHICULE') {
-        const secs = ['AT SPEEDO','AT SIGNAL','AT DIV','STRATTON'];
-        for (const sl of secs) {
-          if (row[1].toUpperCase().includes(sl)) { currentSection = sl; break; }
-        }
-      }
-      if (row[0] && row[0].startsWith('B') && row[1] && !row[1].startsWith('#')) {
-        vehicles.push({
-          stock: row[0], vehicule: row[1], vin: row[2],
-          annee: (row[3] && row[3].match(/^\d{4}$/)) ? row[3] : (row[3] && row[3].match(/^\d{2}$/)) ? '20'+row[3] : row[3],
-          couleur: row[4], km: row[5], notes: row[6],
-          arrival: row[7] || '', submit: row[8] || '', release: row[9] || '',
-          sold: row[10] || '', payment: row[11] || '', counter: row[12] || '',
-          client: row[13] || '', acheteur: row[14] || '',
-          costUsd: parseNum(row[15]), sellUsd: parseNum(row[16]),
-          costCad: parseNum(row[17]), sellCad: parseNum(row[18]),
-          profitCad: parseNum(row[19]),
-          regs: row[20] || '', cfLien: row[21] || '',
-          section: currentSection
-        });
-      }
-    }
+  const invSections = sections.filter(s => !s.includes('STRATTON') && !s.startsWith('AJOUT'));
+  const invLines = invSections.map((name, i) => {
+    const n = base.filter(v => v.section === name).length;
+    return `<div class="kpi-ligne"><span class="kpi-ligne-label">${esc(name)}</span><span class="kpi-ligne-val" style="color:${sectionColor(name, i)}">${n}</span></div>`;
+  }).join('');
 
-    // KPIs — exclure STRATTON
-    const nonStratton = vehicles.filter(v => v.section !== 'STRATTON');
-    const totalCostCad = nonStratton.reduce((s, v) => s + v.costCad, 0);
-    const tommyCostCad = nonStratton.filter(v => {
-      const a = (v.acheteur || '').toUpperCase().trim();
-      return !a || a.includes('DANY') || a.includes('BRUNONE');
-    }).reduce((s, v) => s + v.costCad, 0);
-    const normandCostCad = nonStratton.filter(v => v.acheteur && v.acheteur.toUpperCase().includes('NORMAND')).reduce((s, v) => s + v.costCad, 0);
-    const speedo = vehicles.filter(v => v.section === 'AT SPEEDO');
-    const signal = vehicles.filter(v => v.section === 'AT SIGNAL');
-    const div = vehicles.filter(v => v.section === 'AT DIV');
-    const totalInv = speedo.length + signal.length + div.length;
-    const isTommy = (v) => { const a = (v.acheteur||'').toUpperCase().trim(); return !a || a.includes('DANY') || a.includes('BRUNONE'); };
-    const isNormand = (v) => (v.acheteur||'').toUpperCase().includes('NORMAND');
-    const vendusArr = nonStratton.filter(v => v.client && v.client.trim());
-    const nonVendusArr = nonStratton.filter(v => !v.client || !v.client.trim());
-    const vendusTotal = vendusArr.length;
-    const vendusTommy = vendusArr.filter(isTommy).length;
-    const vendusNormand = vendusArr.filter(isNormand).length;
-    const nonVendusTotal = nonVendusArr.length;
-    const nonVendusTommy = nonVendusArr.filter(isTommy).length;
-    const nonVendusNormand = nonVendusArr.filter(isNormand).length;
-
-    document.getElementById('kpi-us').innerHTML = `
-      <div class="kpi-tableau highlight" style="flex:1">
-        <div class="kpi-tableau-header">Portefeuille</div>
-        <div class="kpi-ligne total-row">
-          <span class="kpi-ligne-label">Coût Total CAD</span>
-          <span class="kpi-ligne-val big" style="color:var(--accent-light)">${fmtCAD(totalCostCad)}</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label"><span class="tag-tommy">TOMMY</span></span>
-          <span class="kpi-ligne-val blue">${fmtCAD(tommyCostCad)}</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label"><span class="tag-normand">NORMAND</span></span>
-          <span class="kpi-ligne-val purple">${fmtCAD(normandCostCad)}</span>
-        </div>
+  document.getElementById('kpi-us').innerHTML = `
+    <div class="kpi-tableau highlight">
+      <div class="kpi-tableau-header">Portefeuille</div>
+      <div class="kpi-ligne total-row">
+        <span class="kpi-ligne-label">Coût Total CAD</span>
+        <span class="kpi-ligne-val big" style="color:var(--accent-light)">${fmtCAD(sum(base))}</span>
       </div>
-      <div class="kpi-tableau tommy" style="flex:1">
-        <div class="kpi-tableau-header">Inventaire</div>
-        <div class="kpi-ligne total-row">
-          <span class="kpi-ligne-label">Total</span>
-          <span class="kpi-ligne-val big" style="color:var(--accent2)">${totalInv}</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label">AT Speedo</span>
-          <span class="kpi-ligne-val" style="color:var(--yellow)">${speedo.length}</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label">AT Signal</span>
-          <span class="kpi-ligne-val" style="color:var(--accent2)">${signal.length}</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label">AT DIV</span>
-          <span class="kpi-ligne-val" style="color:var(--accent3)">${div.length}</span>
-        </div>
+      ${kpiLine(TAG_TOMMY, fmtCAD(sum(base.filter(isTommy))), 'blue')}
+      ${kpiLine(TAG_NORMAND, fmtCAD(sum(base.filter(isNormand))), 'purple')}
+    </div>
+    <div class="kpi-tableau tommy">
+      <div class="kpi-tableau-header">Inventaire</div>
+      <div class="kpi-ligne total-row">
+        <span class="kpi-ligne-label">Total</span>
+        <span class="kpi-ligne-val big" style="color:var(--accent2)">${base.length}</span>
       </div>
-      <div class="kpi-tableau inventaire" style="flex:1">
-        <div class="kpi-tableau-header">Répartition</div>
-        <div class="kpi-ligne total-row">
-          <span class="kpi-ligne-label">Vendus</span>
-          <span class="kpi-ligne-val green big">${vendusTotal}</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label"><span class="tag-tommy">TOMMY</span></span>
-          <span class="kpi-ligne-val blue">${vendusTommy}</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label"><span class="tag-normand">NORMAND</span></span>
-          <span class="kpi-ligne-val purple">${vendusNormand}</span>
-        </div>
-        <div class="kpi-ligne total-row" style="margin-top:4px">
-          <span class="kpi-ligne-label">Non vendus</span>
-          <span class="kpi-ligne-val red big">${nonVendusTotal}</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label"><span class="tag-tommy">TOMMY</span></span>
-          <span class="kpi-ligne-val blue">${nonVendusTommy}</span>
-        </div>
-        <div class="kpi-ligne">
-          <span class="kpi-ligne-label"><span class="tag-normand">NORMAND</span></span>
-          <span class="kpi-ligne-val purple">${nonVendusNormand}</span>
-        </div>
-      </div>
-    `;
-
-
-    const sections = {};
-    for (const v of vehicles) {
-      const sec = v.section || 'AUTRE';
-      if (!sections[sec]) sections[sec] = [];
-      sections[sec].push(v);
-    }
-
-    const sectionColors = { 'AT SPEEDO': '#fbbf24', 'AT SIGNAL': '#38bdf8', 'AT DIV': '#f472b6', 'STRATTON': '#34d399' };
-    let html = '';
-
-    for (const sec of ['AT SPEEDO','AT SIGNAL','AT DIV','STRATTON','AUTRE']) {
-      if (!sections[sec] || sections[sec].length === 0) continue;
-      const dotColor = sectionColors[sec] || '#475569';
-      html += `
-        <div class="table-wrap">
-          <div class="table-section-label">
-            <span class="dot" style="background:${dotColor}"></span>
-            ${sec} <span style="color:var(--text3);margin-left:8px">${sections[sec].length} unité${sections[sec].length > 1 ? 's' : ''}</span>
-          </div>
-          <table style="table-layout:fixed;width:100%">
-            <thead><tr>
-              <th style="width:65px">Stock</th>
-              <th style="width:160px">Véhicule</th>
-              <th style="width:105px">VIN</th>
-              <th style="width:42px">Année</th>
-              <th style="width:55px">Couleur</th>
-              <th style="width:78px">KM</th>
-              <th style="width:230px">Notes</th>
-              <th style="width:68px">Arrival</th>
-              <th style="width:65px">Submit</th>
-              <th style="width:65px">Release</th>
-              <th style="width:65px">Sold</th>
-              <th style="width:65px">Payment</th>
-              <th style="width:48px">Counter</th>
-              <th style="width:115px">Client</th>
-              <th style="width:100px">Acheteur</th>
-              <th style="width:18px"></th>
-            </tr></thead>
-            <tbody>
-      `;
-      for (const v of sections[sec]) {
-        const rowId = 'row-us-' + v.stock.replace(/\W/g,'');
-        const profitColor = v.profitCad > 0 ? 'var(--green)' : v.profitCad < 0 ? 'var(--red)' : 'var(--text3)';
-        const profitFmt = v.profitCad !== 0 ? (v.profitCad > 0 ? '+' : '') + fmtCAD(v.profitCad) : '—';
-        const notesCls = v.notes && v.notes.trim() ? 'notes-highlight' : 'notes-empty';
-        const dateCell = (d) => d ? `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)">${d}</span>` : '<span style="color:var(--text3)">—</span>';
-        const regsUs = (()=>{
-          const r = (v.regs||'').trim().toUpperCase();
-          if(!r||r==='—') return '<span class="regs-afaire">—</span>';
-          if(r==='FAIT') return '<span class="regs-fait">FAIT</span>';
-          if(r.includes('À FAIRE')) return '<span class="regs-afaire">À FAIRE</span>';
-          if(r.includes('À VÉRIF')||r.includes('A VERIF')||r==='X'||r.includes('SCAN')) return `<span class="regs-averif">${v.regs}</span>`;
-          if(r==='N/A') return '<span class="regs-na">N/A</span>';
-          return `<span class="regs-na">${v.regs}</span>`;
-        })();
-        const cfUs = (()=>{
-          const cf = (v.cfLien||'').trim().toUpperCase();
-          if(!cf||cf==='—') return '<span class="regs-afaire">—</span>';
-          if(cf==='FAIT') return '<span class="regs-fait">FAIT</span>';
-          if(cf.includes('À FAIRE')) return '<span class="regs-afaire">À FAIRE</span>';
-          if(cf.includes('À VÉRIF')||cf.includes('A VERIF')) return '<span class="regs-averif">À VÉRIF</span>';
-          if(cf==='N/A') return '<span class="regs-na">N/A</span>';
-          if(cf.startsWith('HTTP')) return `<a href="${v.cfLien}" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:10px;text-decoration:none">↗ Lien</a>`;
-          return `<span class="regs-na">${v.cfLien}</span>`;
-        })();
-        html += `
-        <tr class="data-row expandable-row" onclick="toggleExpand('${rowId}')">
-          <td><span class="stock-num copyable" onclick="copyText(event,'${v.stock}')" title="Copier">${v.stock}</span></td>
-          <td><span class="vehicle-name">${v.vehicule}</span></td>
-          <td><span class="vin-val copyable" onclick="copyText(event,'${v.vin||''}')" title="Copier VIN">${v.vin || '—'}</span></td>
-          <td class="cost-val">${v.annee || '—'}</td>
-          <td class="cost-val">${v.couleur || '—'}</td>
-          <td class="km-cell">${v.km ? Number(v.km).toLocaleString('fr-CA') + ' km' : '—'}</td>
-          <td><span class="${notesCls}" title="${v.notes}">${v.notes || ''}</span></td>
-          <td>${dateCell(v.arrival)}</td>
-          <td>${dateCell(v.submit)}</td>
-          <td>${dateCell(v.release)}</td>
-          <td>${dateCell(v.sold)}</td>
-          <td>${dateCell(v.payment)}</td>
-          <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);text-align:center">${v.counter || '—'}</td>
-          <td class="cost-val" title="${v.client}">${v.client || '—'}</td>
-          <td class="cost-val" title="${v.acheteur}">${v.acheteur || '—'}</td>
-          <td style="color:var(--text3);font-size:10px;text-align:center">▾</td>
-        </tr>
-        <tr class="expand-panel" id="${rowId}" style="display:none">
-          <td colspan="16">
-            <div class="expand-grid" style="grid-template-columns:auto auto;justify-content:start;gap:0">
-              <div class="expand-section" style="min-width:280px;max-width:360px">
-                <div class="expand-section-title">💰 TRANSACTION</div>
-                <div class="expand-row"><span>Cost USD</span><span style="color:var(--accent-light)">${v.costUsd ? fmtUSD(v.costUsd) : '—'}</span></div>
-                <div class="expand-row"><span>Sell Price USD</span><span style="color:var(--accent-light)">${v.sellUsd ? fmtUSD(v.sellUsd) : '—'}</span></div>
-                <div class="expand-row"><span>Cost CAD</span><span style="color:var(--accent2)">${v.costCad ? fmtCAD(v.costCad) : '—'}</span></div>
-                <div class="expand-row"><span>Sell Price CAD</span><span style="color:var(--text2)">${v.sellCad ? fmtCAD(v.sellCad) : '—'}</span></div>
-                <div class="expand-row"><span>Profit CAD</span><span style="color:${profitColor};font-weight:600">${profitFmt}</span></div>
-              </div>
-              <div class="expand-section" style="min-width:200px;max-width:260px">
-                <div class="expand-section-title">📋 ADMIN</div>
-                <div class="expand-row"><span>REGS</span><span>${regsUs}</span></div>
-                <div class="expand-row"><span>CF + Lien</span><span>${cfUs}</span></div>
-              </div>
-            </div>
-          </td>
-        </tr>`;
-      }
-      html += `</tbody></table></div>`;
-    }
-
-    document.getElementById('us-table').innerHTML = html || '<div class="empty">Aucune donnée</div>';
-  } catch(e) {
-    document.getElementById('us-table').innerHTML = `<div class="error">Erreur de chargement.<br><small>${e.message}</small></div>`;
-  }
+      ${invLines}
+    </div>
+    <div class="kpi-tableau inventaire">
+      <div class="kpi-tableau-header">Répartition</div>
+      ${kpiLine('Vendus', vendus.length, 'green big', 'total-row')}
+      ${kpiLine(TAG_TOMMY, vendus.filter(isTommy).length, 'blue')}
+      ${kpiLine(TAG_NORMAND, vendus.filter(isNormand).length, 'purple')}
+      ${kpiLine('Non vendus', nonVendus.length, 'red big', 'total-row')}
+      ${kpiLine(TAG_TOMMY, nonVendus.filter(isTommy).length, 'blue')}
+      ${kpiLine(TAG_NORMAND, nonVendus.filter(isNormand).length, 'purple')}
+    </div>`;
 }
 
-// ─── OFFERS ─────────────────────────────────────────────────────────
-async function loadOffers() {
-  try {
-    const text = await fetchCSV(GIDS.offers);
-    const rows = parseCSV(text);
-
-    const offers = [];
-    let headerFound = false;
-
-    for (const row of rows) {
-      if (row[0] === 'STOCK' && row[1] === 'VÉHICULE') { headerFound = true; continue; }
-      if (!headerFound) continue;
-      if (!row[0] || row[0].startsWith('#') || !row[0].startsWith('B')) continue;
-      // Exclure si STATUT (col S = index 18) contient SOLD
-      const statut = (row[18] || '').toUpperCase().trim();
-      if (statut.includes('SOLD')) continue;
-      offers.push({
-        stock: row[0], vehicule: row[1], vin: row[2],
-        annee: (row[3] && row[3].match(/^\d{4}$/)) ? row[3] : (row[3] && row[3].match(/^\d{2}$/)) ? '20'+row[3] : row[3],
-        km: parseNum(row[4]), date: row[5] || '',
-        costCad: parseNum(row[6]), costUsd: parseNum(row[7]),
-        mmr: parseNum(row[8]), diff: parseNum(row[9]),
-        client: row[10] || '', prixDemande: parseNum(row[11]),
-        offreUsd: parseNum(row[12]), offreCad: parseNum(row[13]),
-        frais: parseNum(row[14]), comm: parseNum(row[15]),
-        profit: parseNum(row[16]), notes: row[17] || '',
-        statut: row[18] || ''
-      });
-    }
-
-    // KPIs
-    const totalOffers = offers.length;
-    const totalProfit = offers.reduce((s, o) => s + o.profit, 0);
-    const profitOffers = offers.filter(o => o.profit > 0);
-    const avgProfit = profitOffers.length ? Math.round(totalProfit / profitOffers.length) : 0;
-    const encan = offers.filter(o => o.statut.toUpperCase().includes('ENCAN')).length;
-
-    document.getElementById('kpi-offers').innerHTML = '';
-    document.getElementById('badge-offers').textContent = totalOffers;
-
-    // Grouper par stock
-    const grouped = {};
-    const stockOrder = [];
-    for (const o of offers) {
-      if (!grouped[o.stock]) { grouped[o.stock] = []; stockOrder.push(o.stock); }
-      grouped[o.stock].push(o);
-    }
-
-    let html = '';
-
-    for (const stock of stockOrder) {
-      const group = grouped[stock];
-      const first = group[0];
-      const bestProfit = Math.max(...group.map(o => o.profit));
-      const bestProfitColor = bestProfit > 0 ? 'var(--green)' : bestProfit < 0 ? 'var(--red)' : 'var(--text3)';
-
-      html += `
-        <div class="table-wrap" style="margin-bottom:16px">
-          <div class="table-section-label" style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px">
-            <div style="display:flex;align-items:center;gap:12px">
-              <span class="stock-num copyable" onclick="copyText(event,'${stock}')" style="font-size:13px">${stock}</span>
-              <span class="vehicle-name" style="color:var(--text)">${first.vehicule}</span>
-              <span class="cost-val" style="color:var(--text3)">${first.annee || ''}</span>
-              <span class="cost-val" style="color:var(--text3)">${first.km ? first.km.toLocaleString('fr-CA') + ' km' : ''}</span>
-              <span class="vin-val" style="font-size:10px">${first.vin || ''}</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:16px">
-              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">Cost CAD <span style="color:var(--text2)">${fmtCAD(first.costCad)}</span></span>
-              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">MMR <span style="color:var(--text2)">${fmtCAD(first.mmr)}</span></span>
-              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">${group.length} offre${group.length > 1 ? 's' : ''}</span>
-              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">Meilleur profit <span style="color:${bestProfitColor};font-weight:600">${bestProfit !== 0 ? (bestProfit > 0 ? '+' : '') + fmtCAD(bestProfit) : '—'}</span></span>
-            </div>
+function usRow(v) {
+  const id = 'r' + (++uid);
+  const p = profitInfo(v.profitCad);
+  const notes = v.notes ? `<span class="notes-highlight" title="${esc(v.notes)}">${esc(v.notes)}</span>` : '';
+  return `
+    <tr class="data-row expandable-row" data-target="${id}">
+      <td class="m-head m1">${stockHtml(v.stock)}</td>
+      <td class="m-head m3"><span class="vehicle-name">${esc(v.vehicule)}</span></td>
+      <td class="m-vin m4" data-label="VIN">${vinHtml(v.vin)}</td>
+      <td class="year-cell cost-val m1" data-label="Année">${esc(v.annee) || '—'}</td>
+      <td class="cost-val m1" data-label="Couleur">${esc(v.couleur) || '—'}</td>
+      <td class="km-cell m2" data-label="KM">${kmFmt(v.km)}</td>
+      <td class="m-notes m4${v.notes ? '' : ' m-empty'}" data-label="Notes">${notes}</td>
+      <td class="m1" data-label="Arrival">${dateCell(v.arrival)}</td>
+      <td class="m1" data-label="Submit">${dateCell(v.submit)}</td>
+      <td class="m1" data-label="Release">${dateCell(v.release)}</td>
+      <td class="m1" data-label="Sold">${dateCell(v.sold)}</td>
+      <td class="cost-val m2" data-label="Client" title="${esc(v.client)}">${esc(v.client) || '—'}</td>
+      <td class="cost-val m2" data-label="Acheteur" title="${esc(v.acheteur)}">${esc(v.acheteur) || '—'}</td>
+      <td class="m-arrow" style="color:var(--text3);font-size:10px;text-align:center">▾</td>
+    </tr>
+    <tr class="expand-panel" id="${id}">
+      <td colspan="14">
+        <div class="expand-grid">
+          <div class="expand-section">
+            <div class="expand-section-title">💰 TRANSACTION</div>
+            <div class="expand-row"><span>MMR</span><span style="color:var(--text2)">${v.mmr ? fmtUSD(v.mmr) : '—'}</span></div>
+            <div class="expand-row"><span>Cost USD</span><span style="color:var(--accent-light)">${v.costUsd ? fmtUSD(v.costUsd) : '—'}</span></div>
+            <div class="expand-row"><span>Sell Price USD</span><span style="color:var(--accent-light)">${v.sellUsd ? fmtUSD(v.sellUsd) : '—'}</span></div>
+            <div class="expand-row"><span>Cost CAD</span><span style="color:var(--accent2)">${v.costCad ? fmtCAD(v.costCad) : '—'}</span></div>
+            <div class="expand-row"><span>Sell Price CAD</span><span style="color:var(--text2)">${v.sellCad ? fmtCAD(v.sellCad) : '—'}</span></div>
+            <div class="expand-row"><span>Profit CAD</span><span style="color:${p.color};font-weight:600">${p.text}</span></div>
           </div>
-          <table style="table-layout:fixed;width:100%">
-            <thead><tr>
-              <th style="width:110px">Client</th>
-              <th style="width:65px">Date</th>
-              <th style="width:88px">MMR</th>
-              <th style="width:90px">Prix Demandé</th>
-              <th style="width:88px">Offre USD</th>
-              <th style="width:88px">Offre CAD</th>
-              <th style="width:85px">Diff MMR</th>
-              <th style="width:60px">Frais</th>
-              <th style="width:55px">Comm</th>
-              <th style="width:105px">Profit</th>
-              <th>Notes</th>
-              <th style="width:75px">Statut</th>
-            </tr></thead>
-            <tbody>`;
+          <div class="expand-section">
+            <div class="expand-section-title">📋 ADMIN</div>
+            <div class="expand-row"><span>Statut</span><span>${statusBadge(v.statut) || '—'}</span></div>
+            <div class="expand-row"><span>REGS</span><span>${statusCell(v.regs)}</span></div>
+            <div class="expand-row"><span>CF + Lien</span><span>${statusCell(v.cfLien)}</span></div>
+            <div class="expand-row"><span>7501</span><span>${statusCell(v.f7501)}</span></div>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+}
 
-      for (const o of group) {
-        const notesCls = o.notes && o.notes.trim() ? 'notes-highlight' : 'notes-empty';
-        const diffColor = o.diff > 0 ? 'var(--green)' : o.diff < 0 ? 'var(--red)' : 'var(--text3)';
-        const isMax = o.profit === bestProfit && bestProfit !== 0;
-        const statutBadge = (()=>{
-          const s = o.statut.toUpperCase();
-          if(s.includes('ENCAN')) return `<span class="regs-averif">${o.statut}</span>`;
-          if(s.includes('STRETCHÉ')||s.includes('STRETCHED')) return `<span class="regs-fait">${o.statut}</span>`;
-          if(s.includes('AWAITING')) return `<span style="color:var(--text3);font-size:10px">${o.statut}</span>`;
-          if(s) return `<span style="color:var(--text2);font-size:10px">${o.statut}</span>`;
-          return '—';
-        })();
-        html += `<tr class="data-row" style="${isMax ? 'background:rgba(52,211,153,0.05);' : ''}">
-          <td style="color:var(--accent2);font-weight:500;font-size:12px">${o.client || '—'}</td>
-          <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)">${o.date || '—'}</td>
-          <td class="cost-val">${o.mmr ? fmtCAD(o.mmr) : '—'}</td>
-          <td class="cost-val">${o.prixDemande ? fmtCAD(o.prixDemande) : '—'}</td>
-          <td class="cost-val">${o.offreUsd ? fmtUSD(o.offreUsd) : '—'}</td>
-          <td class="cost-val">${o.offreCad ? fmtCAD(o.offreCad) : '—'}</td>
-          <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:${diffColor};text-align:right;padding-right:10px">${o.diff ? (o.diff > 0 ? '+' : '') + fmtCAD(o.diff) : '—'}</td>
-          <td class="cost-val">${o.frais ? fmtCAD(o.frais) : '—'}</td>
-          <td class="cost-val">${o.comm ? fmtCAD(o.comm) : '—'}</td>
-          <td>${profitCell(o.profit)}${isMax ? ' <span style="font-size:9px;color:var(--green);font-family:JetBrains Mono,monospace">★ best</span>' : ''}</td>
-          <td><span class="${notesCls}" title="${o.notes}">${o.notes || ''}</span></td>
-          <td style="text-align:center">${statutBadge}</td>
-        </tr>`;
-      }
+async function loadUS() {
+  try {
+    const rows = parseCSV(await fetchCSV(GIDS.us));
+    const { vehicles, sections } = parseSheet(rows, mapUS);
+    renderUsKpis(vehicles, sections);
 
-      html += `</tbody></table></div>`;
+    const thead =
+      th(65, 'Stock') + th(160, 'Véhicule') + th(140, 'VIN') + th(48, 'Année') + th(55, 'Couleur') +
+      th(80, 'KM') + th(230, 'Notes') + th(68, 'Arrival') + th(65, 'Submit') + th(65, 'Release') +
+      th(65, 'Sold') + th(125, 'Client') + th(100, 'Acheteur') + th(18, '');
+
+    let html = '', i = 0;
+    for (const [name, list] of groupBySection(vehicles)) {
+      html += sectionBlock(name, i++, list.length, thead, list.map(usRow).join(''));
     }
-
-    document.getElementById('offers-table').innerHTML = html || '<div class="empty">Aucune offre active</div>';
-  } catch(e) {
-    document.getElementById('offers-table').innerHTML = `<div class="error">Erreur de chargement.<br><small>${e.message}</small></div>`;
+    document.getElementById('us-table').innerHTML = html || '<div class="empty">Aucune donnée</div>';
+  } catch (e) {
+    document.getElementById('kpi-us').innerHTML = '';
+    document.getElementById('us-table').innerHTML = `<div class="error">Erreur de chargement.<br><small>${esc(e.message)}</small></div>`;
   }
 }
 
@@ -1282,7 +1159,7 @@ async function loadAll() {
   document.getElementById('last-update').textContent = 'Chargement...';
   await Promise.all([loadCDN(), loadUS()]);
   const now = new Date();
-  document.getElementById('last-update').textContent = now.toLocaleTimeString('fr-CA', {hour:'2-digit', minute:'2-digit'});
+  document.getElementById('last-update').textContent = now.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
 }
 
 loadAll();
